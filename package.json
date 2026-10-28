@@ -1,0 +1,8 @@
+{
+  "name": "officelife",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "OfficeLife: simulated workdays that bridge the university to work gap",
+  "engines": { "node": ">=18" }
+}
