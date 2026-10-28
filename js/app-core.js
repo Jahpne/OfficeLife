@@ -6,7 +6,7 @@
 const CONFIG = Object.assign({
   apiUrl: "/api/review",       // serverless AI reviewer (Vercel). If unreachable, the rules-based reviewer is used.
   aiEnabled: true,
-  googleClientId: "",          // paste a Google OAuth client ID here to enable real Google sign-in
+  googleClientId: "396281881741-3t8dbaasombvcp48r6glnglrip27vrhm.apps.googleusercontent.com",          // paste a Google OAuth client ID here to enable real Google sign-in
   hackathonUni: "Wale University"
 }, window.OFFICELIFE_CONFIG || {});
 
@@ -85,7 +85,7 @@ function applyTheme() {
   if (S.theme) r.dataset.theme = S.theme; else delete r.dataset.theme;
   document.body.classList.toggle("lite", !!S.lite);
 }
-const baseUrl = () => { const u = location.href.split("#")[0]; return u.startsWith("blob:") || u.startsWith("file:") || u === "about:srcdoc" ? "https://officelife.app/" : u; };
+const baseUrl = () => { const u = location.href.split("#")[0]; return u.startsWith("blob:") || u.startsWith("file:") || u === "about:srcdoc" ? "https://office-life-simulation-chi.vercel.app/" : u; };
 
 /* ---------- router ---------- */
 function nav(path) {
