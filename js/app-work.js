@@ -2,7 +2,6 @@
    OFFICELIFE APP  part C: workday engine, certificate, events
    ===================================================================== */
 
-/* ---------- sheets (modals) and drawer ---------- */
 function openSheet(html) {
   closeSheet();
   const m = document.createElement("div"); m.className = "scrim"; m.id = "sheet";
@@ -22,7 +21,6 @@ function openDrawer() {
 }
 const closeDrawer = () => { const d = $("#drawer"); if (d) d.remove(); };
 
-/* ---------- clock in ---------- */
 function clockin() {
   const r = role(S.enroll.role), a = ARR[S.arrival], d = S.day, L = S.log[d];
   let result = "";
@@ -50,7 +48,6 @@ function doClockIn() {
   S.log[S.day] = { in: a.time + " AM", status: c.status, delta: c.delta, pScore: c.pScore, task: 0, dec: 0, quiz: false, rep: 0, ex: null, method: "rules", taskTitle: "", excerpt: "" };
 }
 
-/* ---------- workday screen ---------- */
 function work() {
   const r = role(S.enroll.role);
   return `<div class="wtop"><div class="wrap">
@@ -130,9 +127,18 @@ function advance(id) {
     setClock(st.t); openQuiz(st, id);
   }
 }
-function finishDay(id) {
+  function finishDay(id) {
   setClock("16:45");
-  const last = S.day >= S.enroll.days - 1, ty = typing(mgrKey());
+  
+  const totalDaysNeeded = 3; 
+  if (!S.user.progress) S.user.progress = {};
+  if (!S.user.progress[S.enroll.role]) S.user.progress[S.enroll.role] = 0;
+  
+  const currentTotal = S.user.progress[S.enroll.role];
+  const totalAfterToday = currentTotal + S.day + 1; 
+  const last = totalAfterToday >= totalDaysNeeded;
+
+  const ty = typing(mgrKey());
   after(id, 1000, () => {
     ty.remove();
     say(mgrKey(), last ? "That is a wrap on the simulation. Well done, thank you for the hard work." : "Good work today. Finish up and I will see you tomorrow at 9.", fmtMin(S.cur));
@@ -143,7 +149,6 @@ function finishDay(id) {
   });
 }
 
-/* ---------- task submission ---------- */
 function body() { return $("#tbody"); }
 function showPicker() {
   const b = body(); if (!b) return;
@@ -253,7 +258,6 @@ async function handleFile(file) {
   submitTask({ name: file.name, text, image });
 }
 
-/* ---------- decisions, quiz, follow-up ---------- */
 function openDecision(st, id) {
   S.decision = { st, id, left: 60, iv: null };
   modal(`<div class="hd"><span class="chip warn">Decision needed</span><span class="timer" id="dtimer" aria-live="off">1:00</span></div>
@@ -285,11 +289,20 @@ function openQuiz(st, id) {
     <div class="choices" id="qopts">${st.options.map((o, i) => `<button class="choice" data-act="answer" data-i="${i}"><b>${esc(o)}</b></button>`).join("")}</div><div id="qfb"></div>`);
 }
 
-/* ---------- day summary ---------- */
 function dayScore(L) { return avg([L.pScore, L.task, L.dec, L.quiz ? 100 : 40, L.rep, L.ex == null ? 60 : L.ex]); }
 function summary() {
-  const r = role(S.enroll.role), L = S.log[S.day] || {}, last = S.day >= S.enroll.days - 1, o = dayScore(L), m = PEOPLE[r.manager];
+  const r = role(S.enroll.role), L = S.log[S.day] || {};
+  
+  const currentTotal = (S.user.progress && S.user.progress[S.enroll.role]) || 0;
+  const totalAfterToday = currentTotal + S.day + 1;
+  const totalDaysNeeded = 3;
+  const isCertEarned = totalAfterToday >= totalDaysNeeded;
+  
+  const nextDayIndex = S.day >= r.days.length - 1 ? 0 : S.day + 1;
+  const nextDayTheme = r.days[nextDayIndex] ? r.days[nextDayIndex].theme : "Advanced tasks";
+  const o = dayScore(L), m = PEOPLE[r.manager];
   const note = o >= 85 ? "Strong day. Your decisions were sound and your work was clear." : o >= 65 ? "Solid day with room to grow. Review the feedback and be sharper tomorrow." : "Tough day, and that is how people learn. Read the feedback closely.";
+  
   return `${header("")}<main class="center screen">
     <span class="chip ok">${I.check} Day ${S.day + 1} complete</span>
     <h1 style="margin:10px 0 4px">Good work today</h1><p class="muted">${esc(r.days[S.day].theme)}</p>
@@ -303,17 +316,31 @@ function summary() {
       <div><span class="k">Teamwork reply</span><span class="v">${L.rep >= 80 ? "Clear and constructive" : "Needs work"}</span></div>
     </div></div>
     <div class="msg" style="margin-top:18px"><div class="av" style="background:${m.color}">${m.ini}</div><div class="mb"><div class="mh"><b>${m.name}</b><span class="r">${m.role}</span></div><div class="txt">${note}</div></div></div>
-    <button class="btn pri block" style="margin-top:22px" data-act="${last ? "toCert" : "nextDay"}">${last ? "Get your certificate" : "Start Day " + (S.day + 2)}</button>
-    ${last ? "" : `<p class="xs muted" style="text-align:center;margin-top:8px">Day ${S.day + 2} opens tomorrow at 9:00 AM. Tap to jump ahead in this preview.</p>`}
+    
+    <div class="card" style="margin-top:18px; text-align:center;">
+      <h3>Certificate Progress</h3>
+      <div class="ring" style="--p:${Math.min(100, (totalAfterToday/totalDaysNeeded)*100)}; margin: 10px auto;"><span>${totalAfterToday}/${totalDaysNeeded}</span></div>
+      <p class="small muted">Days completed for ${r.title}</p>
+    </div>
+
+    <button class="btn pri block" style="margin-top:22px" data-act="${isCertEarned ? "toCert" : "nextDay"}">
+      ${isCertEarned ? "Get your certificate" : "Start Day " + (S.day + 2) + " (" + nextDayTheme + ")"}
+    </button>
+    ${isCertEarned ? "" : `<p class="xs muted" style="text-align:center;margin-top:8px">Complete ${totalDaysNeeded - totalAfterToday} more day(s) to unlock your certificate.</p>`}
   </main>${footer()}`;
 }
-
-/* ---------- certificate ---------- */
 function makeCert() {
   const log = S.log.slice(0, S.enroll.days);
-  const p = certPayload(S.user, S.enroll.role, S.enroll.days, log, today());
+  
+  if (!S.user.progress) S.user.progress = {};
+  S.user.progress[S.enroll.role] = (S.user.progress[S.enroll.role] || 0) + S.enroll.days;
+  persist(); 
+
+  const certDays = S.user.progress[S.enroll.role]; 
+
+  const p = certPayload(S.user, S.enroll.role, certDays, log, today());
   const sc = scoreLog(log);
-  const c = { code: certCode(p), token: certToken(p), role: S.enroll.role, n: S.enroll.days, date: today(), overall: sc.overall, onTime: sc.onTime, sc,
+  const c = { code: certCode(p), token: certToken(p), role: S.enroll.role, n: certDays, date: today(), overall: sc.overall, onTime: sc.onTime, sc,
     evidence: log.map((l, i) => ({ day: i + 1, title: l.taskTitle, excerpt: l.excerpt, method: l.method, score: l.task })) };
   S.certs = S.certs.filter(x => x.code !== c.code); S.certs.push(c); persist(); return c;
 }
@@ -384,122 +411,3 @@ async function drawQR() {
     el.innerHTML = q.createSvgTag(3, 0);
   } catch (e) { el.textContent = ""; }
 }
-
-/* ---------- actions ---------- */
-const actions = {
-  go: a => { const to = a.dataset.to; if (to === "/#faq") { nav("/"); setTimeout(() => { const f = $("#faq"); if (f) f.scrollIntoView({ behavior: "smooth" }); }, 60); } else nav(to); },
-  drawer: openDrawer, closeDrawer,
-  drawerGo: a => { closeDrawer(); nav(a.dataset.to); },
-  closeSheet,
-  theme: () => {
-    const dark = S.theme ? S.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    S.theme = dark ? "light" : "dark"; store.set("theme", S.theme); applyTheme(); closeDrawer();
-  },
-  lite: () => { S.lite = !S.lite; store.set("lite", S.lite); applyTheme(); route(); },
-  google: googleSignIn,
-  googleDemo: () => { closeSheet(); S.form.name = "Demo Student"; S.form.email = "demo.student@gmail.com"; S.form.google = true; if (parseRoute().name === "login") nav("/signup"); else route(); },
-  doSignup, doLogin,
-  pickUni: a => { const inp = $("#" + a.dataset.id); inp.value = a.dataset.v; S.form[inp.dataset.f] = a.dataset.v; hideUniList(a.dataset.id); },
-  setDays: a => { S.form.simDays = +a.dataset.n; const y = scrollY; route(); scrollTo(0, y); },
-  enroll: a => {
-    S.form.simDays = +a.dataset.n;
-    if (!S.user) { S.next = "/sim/" + a.dataset.id; return nav("/signup"); }
-    S.enroll = { role: a.dataset.id, days: +a.dataset.n }; S.day = 0; S.log = []; S.revised = false; S.aiFails = 0; nav("/clockin");
-  },
-  setArrival: a => { S.arrival = a.dataset.k; route(); },
-  clockIn: () => { doClockIn(); route(); },
-  enterWork: () => nav("/work"),
-  leaveWork: () => { S.runId = 0; nav("/dashboard"); },
-  pick: () => $("#file").click(),
-  sample: () => { const T = S.task; if (!T) return; submitTask({ name: T.st.sampleName, text: T.attempt === 0 ? T.st.sampleBad : T.st.sampleGood }); },
-  typeToggle: () => showEditor(""),
-  cancelEditor: showPicker,
-  editAgain: () => showEditor(S.task && S.task.last ? S.task.last.text : ""),
-  submitText: () => { const v = ($("#ans") || {}).value || ""; if (wordCount(v) < 5) return toast("Write a little more first"); submitTask({ name: "Typed answer", text: v }); },
-  submitNote: () => { const v = ($("#note") || {}).value || ""; const T = S.task; if (wordCount(v) < 5) return toast("Add a few words describing your work"); submitTask({ name: T.pendingSub.name, text: v, image: T.pendingSub.image, noted: true }); },
-  reply: a => {
-    const P = S.pending; if (!P) return; S.pending = null;
-    const o = P.st.options[+a.dataset.i]; P.q.remove(); S.log[S.day].rep = o.score; me(o.label);
-    const ty = typing(P.st.from);
-    after(P.id, 900, () => { ty.remove(); say(P.st.from, o.resp, fmtMin(S.cur)); after(P.id, 700, () => advance(P.id)); });
-  },
-  fuSend: () => {
-    const F = S.fu; if (!F) return; const v = ($("#fu-in") || {}).value || "";
-    if (wordCount(v) < 3) return toast("Write at least a short sentence");
-    S.fu = null; F.el.remove(); me(v);
-    const r = evaluateFollowup(v, F.st); S.log[S.day].ex = r.pct;
-    const ty = typing(F.st.from);
-    after(F.id, 1000, () => { ty.remove(); say(F.st.from, r.feedback, fmtMin(S.cur)); after(F.id, 800, () => advance(F.id)); });
-  },
-  decide: a => decide(a.dataset.k),
-  answer: a => {
-    const Q = S.quiz; if (!Q || Q.done) return; Q.done = true;
-    const i = +a.dataset.i, ok = i === Q.st.correct; S.log[S.day].quiz = ok;
-    $$("#qopts .choice").forEach((b, k) => { if (k === Q.st.correct) b.classList.add("right"); else if (k === i) b.classList.add("wrong"); });
-    $("#qfb").innerHTML = `<p class="why"><b>${ok ? "Correct." : "Not quite."}</b> ${Q.st.why}</p><button class="btn pri block" style="margin-top:14px" data-act="quizNext">Continue</button>`;
-  },
-  quizNext: () => { const Q = S.quiz; closeModal(); put("Back to work", "sys"); after(Q.id, 600, () => advance(Q.id)); },
-  clockOut: () => { S.log[S.day].out = "5:00 PM"; nav("/summary"); },
-  nextDay: () => { S.day++; nav("/clockin"); },
-  toCert: () => { const c = makeCert(); nav("/cert/" + c.code); },
-  mentorFilter: a => { S.mentorRole = a.dataset.r; route(); },
-  bookOpen: a => openBooking(a.dataset.id),
-  pickSlot: a => { S.form.slot = a.dataset.s; $$("[data-act=pickSlot]").forEach(b => b.setAttribute("aria-checked", String(b === a))); },
-  confirmBooking,
-  buyPlus: () => {
-    if (!S.user) { S.next = "/premium"; return nav("/signup"); }
-    if (S.user.plan === "plus") return toast("You are already on Premium");
-    openSheet(`<div class="hd"><h2>Start Premium</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div><p class="muted">${naira(PRICING.plus)} per month. Cancel any time.</p>
-      <p class="small muted" style="margin-top:8px">Demo payment. The live version uses Paystack.</p><button class="btn pri block" style="margin-top:14px" data-act="payPlus">Pay ${naira(PRICING.plus)} (demo)</button>`);
-  },
-  payPlus: () => { S.user.plan = "plus"; persist(); closeSheet(); toast("Welcome to Premium"); route(); },
-  viewCand: a => viewCand(a.dataset.n),
-  shortlist: a => { const n = a.dataset.n, i = S.shortlist.indexOf(n); if (i >= 0) S.shortlist.splice(i, 1); else S.shortlist.push(n); persist(); $("#cands").innerHTML = candCards(); },
-  invite: a => inviteCand(a.dataset.n),
-  sendInvite: () => { closeSheet(); toast("Invite sent (demo)"); },
-  postSim: () => {
-    const f = S.form; if (!(f.pco || "").trim() || !(f.prole || "").trim() || wordCount(f.ptask) < 5) return toast("Fill in all three fields");
-    S.posts.push({ co: f.pco.trim(), role: f.prole.trim() }); persist(); f.pco = f.prole = f.ptask = ""; toast("Request received. We will contact you."); const y = scrollY; route(); scrollTo(0, y);
-  },
-  csv: downloadCSV,
-  scrollTo: a => { const e = $("#" + a.dataset.id); if (e) e.scrollIntoView({ behavior: "smooth" }); },
-  saveProfile,
-  signout: () => { S.user = null; persist(); store.del("user"); toast("Signed out"); nav("/"); },
-  linkedin: () => window.open(S.liUrl, "_blank", "noopener"),
-  printCert: () => window.print(),
-  whatsapp: () => window.open("https://wa.me/?text=" + encodeURIComponent(S.shareText), "_blank", "noopener"),
-  copyLink: async () => { try { await navigator.clipboard.writeText(S.shareLink); toast("Link copied"); } catch (e) { prompt("Copy this link", S.shareLink); } }
-};
-
-document.addEventListener("click", e => {
-  const a = e.target.closest("[data-act]");
-  if (!e.target.closest(".combo")) $$("[data-combo]").forEach(i => hideUniList(i.id));
-  if (!a) return;
-  const f = actions[a.dataset.act]; if (f) f(a);
-});
-document.addEventListener("input", e => {
-  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
-  S.form[k] = t.value;
-  if (t.dataset.combo) renderUniList(t.id);
-  if (t.dataset.live === "explore") { const q = t.value.toLowerCase(); const list = Object.keys(ROLES).filter(x => !q || ROLES[x].title.toLowerCase().includes(q) || ROLES[x].skills.join(" ").toLowerCase().includes(q)); $("#exlist").innerHTML = list.map(roleCard).join("") || '<p class="muted">No roles match your search.</p>'; }
-  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
-});
-document.addEventListener("change", e => {
-  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
-  S.form[k] = t.value;
-  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
-});
-document.addEventListener("focusin", e => { if (e.target.dataset && e.target.dataset.combo) renderUniList(e.target.id); });
-document.addEventListener("keydown", e => {
-  const t = e.target;
-  if (t.dataset && t.dataset.combo) {
-    if (e.key === "Escape") hideUniList(t.id);
-    if (e.key === "Enter") { e.preventDefault(); const first = $("#" + t.id + "-list button[data-v]"); if (first) { t.value = first.dataset.v; S.form[t.dataset.f] = t.value; hideUniList(t.id); } }
-  }
-  if (t.id === "fu-in" && e.key === "Enter") actions.fuSend();
-});
-$("#file").addEventListener("change", e => { const f = e.target.files[0]; if (f) handleFile(f); e.target.value = ""; });
-window.addEventListener("hashchange", route);
-
-applyTheme();
-route();
