@@ -5,7 +5,7 @@ const MODEL = process.env.HF_MODEL || "Qwen/Qwen3-VL-8B-Instruct"; // change in 
 const ENDPOINT = "https://router.huggingface.co/v1/chat/completions";
 
 // ---------- scripted fallback (works with no AI) ----------
-function fallbackReview({ rubric = [], text = "", fileName = "" }) {
+function fallbackReview({ rubric = [], text = "", fileName = "", reason = "" }) {
   const lower = (text || "").toLowerCase();
   // rubric items look like { label: "Risks", keywords: ["risk", "owner"] }
   const missing = rubric.filter(r => r.keywords && !r.keywords.some(k => lower.includes(k.toLowerCase())));
@@ -13,6 +13,7 @@ function fallbackReview({ rubric = [], text = "", fileName = "" }) {
   if (hasText && missing.length) {
     return {
       source: "fallback",
+      reason,
       verdict: "fix",
       score: 60,
       notes: missing.map(m => `Add something about: ${m.label}`)
@@ -20,6 +21,7 @@ function fallbackReview({ rubric = [], text = "", fileName = "" }) {
   }
   return {
     source: "fallback",
+    reason,
     verdict: "well_done",
     score: 85,
     notes: [`Received ${fileName || "your file"}. Clear and ready to share.`]
@@ -53,7 +55,7 @@ async function askModel({ task, rubric, text, imageDataUrl }) {
       temperature: 0.2
     })
   });
-  if (!res.ok) throw new Error(`Model error ${res.status}`);
+  if (!res.ok) { const body = await res.text().catch(() => ""); throw new Error(`Model error ${res.status}: ${body.slice(0, 200)}`); }
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || "";
   const json = JSON.parse(raw.replace(/```json|```/g, "").trim());
@@ -67,8 +69,25 @@ async function askModel({ task, rubric, text, imageDataUrl }) {
 }
 
 // ---------- handler ----------
+async function selfTest(res) {
+  const out = { tokenSet: !!process.env.HF_TOKEN, model: MODEL };
+  if (!out.tokenSet) { out.result = "No HF_TOKEN found. Add it in Vercel, Settings, Environment Variables, then Redeploy."; return res.status(200).json(out); }
+  try {
+    const r = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.HF_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: MODEL, messages: [{ role: "user", content: "Reply with the single word: ok" }], max_tokens: 5 })
+    });
+    out.status = r.status;
+    const body = await r.text();
+    out.result = r.ok ? "AI is working" : body.slice(0, 300);
+  } catch (e) { out.result = "Could not reach Hugging Face: " + String(e.message || e).slice(0, 200); }
+  return res.status(200).json(out);
+}
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
+  if (req.method === "GET" && req.query && req.query.test) return selfTest(res);
+  if (req.method !== "POST") return res.status(405).json({ error: "Use POST. Add ?test=1 to the address to run a health check." });
 
   const body = req.body || {};
   const { task = "", rubric = [], text = "", imageDataUrl = "", fileName = "" } = body;
@@ -87,6 +106,6 @@ export default async function handler(req, res) {
     return res.status(200).json(result);
   } catch (err) {
     // any failure (credit used up, model down, bad JSON) -> scripted feedback
-    return res.status(200).json(fallbackReview({ rubric, text, fileName }));
+    return res.status(200).json(fallbackReview({ rubric, text, fileName, reason: String(err.message || err).slice(0, 200) }));
   }
 }
