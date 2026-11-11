@@ -4,13 +4,13 @@
 
 /* ---------- config (set these when you deploy) ---------- */
 const CONFIG = Object.assign({
-  apiUrl: "/api/review",       // serverless AI reviewer (Vercel). If unreachable, the rules-based reviewer is used.
+  apiUrl: "/api/review",
   aiEnabled: true,
-  googleClientId: "396281881741-3t8dbaasombvcp48r6glnglrip27vrhm.apps.googleusercontent.com",          // paste a Google OAuth client ID here to enable real Google sign-in
+  googleClientId: "396281881741-3t8dbaasombvcp48r6glnglrip27vrhm.apps.googleusercontent.com",
   hackathonUni: "Wale University"
 }, window.OFFICELIFE_CONFIG || {});
 
-/* ---------- safe storage (works even where localStorage is blocked) ---------- */
+/* ---------- safe storage ---------- */
 const mem = {};
 const store = {
   get(k, d) { try { const v = localStorage.getItem("ol_" + k); return v ? JSON.parse(v) : (k in mem ? mem[k] : d); } catch (e) { return k in mem ? mem[k] : d; } },
@@ -27,7 +27,7 @@ const S = {
   posts: store.get("posts", []),
   theme: store.get("theme", ""),
   lite: store.get("lite", false),
-  enroll: null,            // { role, days }
+  enroll: null,
   day: 0, log: [], arrival: "on", revised: false,
   form: {}, runId: 0, cur: 540, step: 0, task: null, pending: null, decision: null, quiz: null, fu: null,
   filters: { role: "", uni: "", min: "", q: "" },
@@ -58,11 +58,9 @@ const I = {
   google: '<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>'
 };
 
-/* ---------- logo: bridge arch (university to office) with a clock ---------- */
 const LOGO = (s = 34) => `<svg viewBox="0 0 64 64" width="${s}" height="${s}" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0056D2"/><path d="M12 46 C12 22 52 22 52 46" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/><path d="M8 46 H56" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/><path d="M12 46 V54 M52 46 V54" stroke="#fff" stroke-width="4.5" stroke-linecap="round"/><circle cx="32" cy="37.5" r="6.5" fill="#FFB020"/><path d="M32 33.6 V37.5 H35.4" fill="none" stroke="#0B1E4D" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ARCH_BG = `<svg class="archbg" viewBox="0 0 400 260" aria-hidden="true"><path d="M30 190 C30 30 370 30 370 190" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/><path d="M0 190 H400" stroke="#fff" stroke-width="22" stroke-linecap="round"/><path d="M30 190 V250 M370 190 V250" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg>`;
 
-/* ---------- small helpers ---------- */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const app = $("#app");
@@ -87,7 +85,6 @@ function applyTheme() {
 }
 const baseUrl = () => { const u = location.href.split("#")[0]; return u.startsWith("blob:") || u.startsWith("file:") || u === "about:srcdoc" ? "https://office-life-simulation-chi.vercel.app/" : u; };
 
-/* ---------- router ---------- */
 function nav(path) {
   const target = "#" + path;
   if (location.hash === target) route(); else location.hash = target;
@@ -115,7 +112,6 @@ function route() {
   if (after) after(r.arg);
 }
 
-/* ---------- layout ---------- */
 function header(active) {
   const links = [["explore", "Explore"], ["universities", "Universities"], ["employers", "Employers"], ["premium", "Premium"]];
   const right = S.user
@@ -140,18 +136,16 @@ function footer() {
 }
 function shell(active, body) { return header(active) + body + footer(); }
 
-/* ---------- reusable pieces ---------- */
 function roleCard(k) {
   const r = role(k);
   return `<button class="course" data-act="go" data-to="/sim/${k}"><div class="org ${r.cls}">${r.short}</div>
-    <div><div class="o">Tembea Logistics</div><div class="n">${r.title}</div><div class="m">Career simulation &middot; 1 to 3 workdays &middot; Certificate</div></div></button>`;
+    <div><div class="o">Tembea Logistics</div><div class="n">${r.title}</div><div class="m">Career simulation &middot; 1 to 6 workdays &middot; Certificate</div></div></button>`;
 }
 function dayPlanRail() {
   return `<div class="rail">${DAY_PLAN.map(p => `<div class="step"><div class="tm">${p[0]}</div><div class="tx"><b>${p[1]}</b><span class="small muted">${p[2]}</span></div></div>`).join("")}</div>`;
 }
 function ring(p) { return `<div class="ring" style="--p:${p}"><span>${p}</span></div>`; }
 
-/* ---------- landing ---------- */
 function home() {
   return shell("", `<main class="wrap">
     <section class="hero">${ARCH_BG}
@@ -191,7 +185,7 @@ function home() {
 
     <section class="sect"><div class="panel">
       <div class="row" style="justify-content:space-between;align-items:baseline;margin-bottom:12px"><h2 style="font-size:20px">Start a simulation</h2><button class="link" data-act="go" data-to="/explore">See all</button></div>
-      <div class="grid3">${["pm", "swe", "da"].map(roleCard).join("")}</div>
+      <div class="grid3">${["pm", "swe", "da", "hr"].map(roleCard).join("")}</div>
       <div class="chips" style="margin-top:14px"><span class="small muted" style="align-self:center">Coming soon:</span>${["Marketing Associate", "Customer Support", "Accountant", "UI/UX Designer"].map(x => `<span class="pill">${x}</span>`).join("")}</div>
     </div></section>
 
@@ -228,7 +222,6 @@ function home() {
   </main>`);
 }
 
-/* ---------- university combobox ---------- */
 function uniField(id, value, err, key = "uni") {
   return `<div class="field ${err ? "err" : ""}"><label for="${id}">University</label>
     <div class="combo"><input id="${id}" data-f="${key}" data-combo="1" value="${esc(value || "")}" placeholder="Start typing, for example Wale University" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="${id}-list">
@@ -246,10 +239,9 @@ function renderUniList(id) {
 }
 function hideUniList(id) { const l = $("#" + id + "-list"), i = $("#" + id); if (l) l.hidden = true; if (i) i.setAttribute("aria-expanded", "false"); }
 
-/* ---------- sign up / log in ---------- */
 function signup() {
   const f = S.form, e = f.errors || {};
-  const careers = [["", "Choose one"], ["pm", "Project Manager"], ["swe", "Software Engineer"], ["da", "Data Analyst"], ["unsure", "Not sure yet"]];
+  const careers = [["", "Choose one"], ["pm", "Project Manager"], ["swe", "Software Engineer"], ["da", "Data Analyst"], ["hr", "HR Personnel"], ["unsure", "Not sure yet"]];
   return `${header("")}<main class="center screen" style="padding-top:28px">
     <h1>Create your free account</h1>
     <p class="muted" style="margin-top:6px">Build your proof of work. It takes a minute.</p>
@@ -284,7 +276,7 @@ function doSignup() {
   if (!f.terms) e.terms = "Please accept the terms to continue.";
   f.errors = e;
   if (Object.keys(e).length) { route(); const first = $(".field.err input,.field.err select"); if (first) first.focus(); return; }
-  S.user = { name: f.name, email: f.email.trim().toLowerCase(), uni, level: f.level, course: f.course || "", target: f.target || "", plan: "free", google: !!f.google, joined: today() };
+  S.user = { name: f.name, email: f.email.trim().toLowerCase(), uni, level: f.level, course: f.course || "", target: f.target || "", plan: "free", google: !!f.google, joined: today(), progress: {} };
   persist();
   const accounts = store.get("accounts", {}); accounts[S.user.email] = S.user; store.set("accounts", accounts);
   S.form = {};
@@ -315,7 +307,6 @@ function doLogin() {
   S.user = u; f.lerr = ""; persist(); toast("Welcome back, " + u.name.split(" ")[0]); nav(S.next || "/dashboard"); S.next = "";
 }
 
-/* ---------- google sign-in: real when a client ID is set, demo otherwise ---------- */
 async function googleSignIn() {
   if (!CONFIG.googleClientId) {
     openSheet(`<div class="hd"><h2>Choose an account</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div>
@@ -337,3 +328,169 @@ async function googleSignIn() {
     google.accounts.id.prompt();
   } catch (e) { toast("Could not reach Google. Use email for now."); }
 }
+
+function sim(id) {
+  const r = role(id) || role("pm"); id = r.id;
+  const days = S.form.simDays || 1;
+  const lens = [[1, "1 day", "About 12 minutes"], [3, "3 days (Full Cert)", "About 35 minutes"], [6, "6 days (Advanced)", "About 70 minutes"]];
+  return shell("explore", `<main>
+    <section class="wash"><div class="wrap">
+      <div class="crumbs"><button data-act="go" data-to="/">Home</button>&rsaquo;<button data-act="go" data-to="/explore">Simulations</button>&rsaquo;<span>${r.title}</span></div>
+      <h1>${r.title} Simulation</h1>
+      <p class="muted" style="margin-top:8px;max-width:60ch">${r.blurb}</p>
+      <p class="small" style="margin-top:12px">Part of <b>OfficeLife Career Simulations</b></p>
+      <div class="row" style="margin-top:10px;flex-wrap:wrap"><div class="org ${r.cls}" style="width:28px;height:28px;font-size:11px">TL</div><span class="small">Manager: <b>${PEOPLE[r.manager].name}</b> (simulated)</span><span class="chip blue">New</span></div>
+    </div></section>
+    <div class="wrap">
+      <div class="facts">
+        <div class="fact"><b>${days} ${days > 1 ? "workdays" : "workday"}</b><span>Experience a real day at the office</span></div>
+        <div class="fact"><b>Beginner level</b><span>No prior experience required</span></div>
+        <div class="fact"><b>10 to 15 minutes a day</b><span>Learn at your own pace</span></div>
+        <div class="fact"><b>Verified certificate</b><span>Link, QR code and scores</span></div>
+      </div>
+      <section class="sect"><div class="card" style="max-width:640px">
+        <h2 style="font-size:20px">Set up your simulation</h2>
+        <p class="small muted" style="margin:4px 0 14px">Choose how long you want to work. Complete 3 days total to unlock your certificate.</p>
+        <div class="choices" role="radiogroup" aria-label="Simulation length">${lens.map(l => `<button class="opt" role="radio" aria-checked="${days === l[0]}" data-act="setDays" data-n="${l[0]}" data-id="${id}"><span class="radio"></span><div><b>${l[1]}</b><span>${l[2]}</span></div></button>`).join("")}</div>
+        <button class="btn pri block" style="margin-top:18px" data-act="enroll" data-id="${id}" data-n="${days}">${S.user ? "Enroll for free" : "Sign up to enroll"}</button>
+        <p class="xs muted" style="margin-top:8px;text-align:center">Starts now &middot; Your arrival time is logged against a 9:00 AM shift</p>
+      </div></section>
+      <section class="sect"><h2>What you'll learn</h2><ul class="checks" style="margin-top:12px">${r.learn.map(x => `<li>${I.check}<span>${x}</span></li>`).join("")}</ul></section>
+      <section class="sect"><h2>Skills you'll gain</h2><div class="chips" style="margin-top:12px">${r.skills.map(x => `<span class="chip">${x}</span>`).join("")}</div></section>
+      <section class="sect"><h2>Your ${days > 1 ? days + " days" : "day"} at Tembea</h2><div class="grid3" style="margin-top:12px">${r.days.slice(0, Math.min(days, r.days.length)).map((d, i) => `<div class="card"><span class="chip blue">Day ${i + 1}</span><h3 style="margin-top:8px">${esc(d.theme)}</h3></div>`).join("")}</div></section>
+      <section class="sect"><h2>How each day runs</h2>${dayPlanRail()}</section>
+      <section class="sect"><h2>Jobs this prepares you for</h2><p class="muted" style="margin-top:6px">${r.jobs}</p></section>
+      <section class="sect"><h2>Details to know</h2><div class="card kv" style="margin-top:12px">
+        <div><span class="k">Assessments</span><span class="v">Reviewed on every task</span></div>
+        <div><span class="k">Check-ins</span><span class="v">Clock in and out logged</span></div>
+        <div><span class="k">Certificate</span><span class="v">Verified link and QR</span></div>
+        <div><span class="k">Language</span><span class="v">English</span></div></div></section>
+    </div></main>`);
+}
+
+const actions = {
+  go: a => { const to = a.dataset.to; if (to === "/#faq") { nav("/"); setTimeout(() => { const f = $("#faq"); if (f) f.scrollIntoView({ behavior: "smooth" }); }, 60); } else nav(to); },
+  drawer: openDrawer, closeDrawer,
+  drawerGo: a => { closeDrawer(); nav(a.dataset.to); },
+  closeSheet,
+  theme: () => {
+    const dark = S.theme ? S.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    S.theme = dark ? "light" : "dark"; store.set("theme", S.theme); applyTheme(); closeDrawer();
+  },
+  lite: () => { S.lite = !S.lite; store.set("lite", S.lite); applyTheme(); route(); },
+  google: googleSignIn,
+  googleDemo: () => { closeSheet(); S.form.name = "Demo Student"; S.form.email = "demo.student@gmail.com"; S.form.google = true; if (parseRoute().name === "login") nav("/signup"); else route(); },
+  doSignup, doLogin,
+  pickUni: a => { const inp = $("#" + a.dataset.id); inp.value = a.dataset.v; S.form[inp.dataset.f] = a.dataset.v; hideUniList(a.dataset.id); },
+  setDays: a => { S.form.simDays = +a.dataset.n; const y = scrollY; route(); scrollTo(0, y); },
+  enroll: a => {
+    S.form.simDays = +a.dataset.n;
+    if (!S.user) { S.next = "/sim/" + a.dataset.id; return nav("/signup"); }
+    
+    if (!S.user.progress) S.user.progress = {};
+
+    S.enroll = { role: a.dataset.id, days: +a.dataset.n }; 
+    S.day = 0; S.log = []; S.revised = false; S.aiFails = 0; nav("/clockin");
+  },
+  setArrival: a => { S.arrival = a.dataset.k; route(); },
+  clockIn: () => { doClockIn(); route(); },
+  enterWork: () => nav("/work"),
+  leaveWork: () => { S.runId = 0; nav("/dashboard"); },
+  pick: () => $("#file").click(),
+  sample: () => { const T = S.task; if (!T) return; submitTask({ name: T.st.sampleName, text: T.attempt === 0 ? T.st.sampleBad : T.st.sampleGood }); },
+  typeToggle: () => showEditor(""),
+  cancelEditor: showPicker,
+  editAgain: () => showEditor(S.task && S.task.last ? S.task.last.text : ""),
+  submitText: () => { const v = ($("#ans") || {}).value || ""; if (wordCount(v) < 5) return toast("Write a little more first"); submitTask({ name: "Typed answer", text: v }); },
+  submitNote: () => { const v = ($("#note") || {}).value || ""; const T = S.task; if (wordCount(v) < 5) return toast("Add a few words describing your work"); submitTask({ name: T.pendingSub.name, text: v, image: T.pendingSub.image, noted: true }); },
+  reply: a => {
+    const P = S.pending; if (!P) return; S.pending = null;
+    const o = P.st.options[+a.dataset.i]; P.q.remove(); S.log[S.day].rep = o.score; me(o.label);
+    const ty = typing(P.st.from);
+    after(P.id, 900, () => { ty.remove(); say(P.st.from, o.resp, fmtMin(S.cur)); after(P.id, 700, () => advance(P.id)); });
+  },
+  fuSend: () => {
+    const F = S.fu; if (!F) return; const v = ($("#fu-in") || {}).value || "";
+    if (wordCount(v) < 3) return toast("Write at least a short sentence");
+    S.fu = null; F.el.remove(); me(v);
+    const r = evaluateFollowup(v, F.st); S.log[S.day].ex = r.pct;
+    const ty = typing(F.st.from);
+    after(F.id, 1000, () => { ty.remove(); say(F.st.from, r.feedback, fmtMin(S.cur)); after(F.id, 800, () => advance(F.id)); });
+  },
+  decide: a => decide(a.dataset.k),
+  answer: a => {
+    const Q = S.quiz; if (!Q || Q.done) return; Q.done = true;
+    const i = +a.dataset.i, ok = i === Q.st.correct; S.log[S.day].quiz = ok;
+    $$("#qopts .choice").forEach((b, k) => { if (k === Q.st.correct) b.classList.add("right"); else if (k === i) b.classList.add("wrong"); });
+    $("#qfb").innerHTML = `<p class="why"><b>${ok ? "Correct." : "Not quite."}</b> ${Q.st.why}</p><button class="btn pri block" style="margin-top:14px" data-act="quizNext">Continue</button>`;
+  },
+  quizNext: () => { const Q = S.quiz; closeModal(); put("Back to work", "sys"); after(Q.id, 600, () => advance(Q.id)); },
+  clockOut: () => { S.log[S.day].out = "5:00 PM"; nav("/summary"); },
+  nextDay: () => { 
+    S.day++; 
+    const maxDaysInRole = role(S.enroll.role).days.length;
+    if (S.day >= maxDaysInRole) S.day = 0; // Loop back to Day 1 if they are doing a 6-day run
+    nav("/clockin"); 
+  },
+  toCert: () => { const c = makeCert(); nav("/cert/" + c.code); },
+  mentorFilter: a => { S.mentorRole = a.dataset.r; route(); },
+  bookOpen: a => openBooking(a.dataset.id),
+  pickSlot: a => { S.form.slot = a.dataset.s; $$("[data-act=pickSlot]").forEach(b => b.setAttribute("aria-checked", String(b === a))); },
+  confirmBooking,
+  buyPlus: () => {
+    if (!S.user) { S.next = "/premium"; return nav("/signup"); }
+    if (S.user.plan === "plus") return toast("You are already on Premium");
+    openSheet(`<div class="hd"><h2>Start Premium</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div><p class="muted">${naira(PRICING.plus)} per month. Cancel any time.</p>
+      <p class="small muted" style="margin-top:8px">Demo payment. The live version uses Paystack.</p><button class="btn pri block" style="margin-top:14px" data-act="payPlus">Pay ${naira(PRICING.plus)} (demo)</button>`);
+  },
+  payPlus: () => { S.user.plan = "plus"; persist(); closeSheet(); toast("Welcome to Premium"); route(); },
+  viewCand: a => viewCand(a.dataset.n),
+  shortlist: a => { const n = a.dataset.n, i = S.shortlist.indexOf(n); if (i >= 0) S.shortlist.splice(i, 1); else S.shortlist.push(n); persist(); $("#cands").innerHTML = candCards(); },
+  invite: a => inviteCand(a.dataset.n),
+  sendInvite: () => { closeSheet(); toast("Invite sent (demo)"); },
+  postSim: () => {
+    const f = S.form; if (!(f.pco || "").trim() || !(f.prole || "").trim() || wordCount(f.ptask) < 5) return toast("Fill in all three fields");
+    S.posts.push({ co: f.pco.trim(), role: f.prole.trim() }); persist(); f.pco = f.prole = f.ptask = ""; toast("Request received. We will contact you."); const y = scrollY; route(); scrollTo(0, y);
+  },
+  csv: downloadCSV,
+  scrollTo: a => { const e = $("#" + a.dataset.id); if (e) e.scrollIntoView({ behavior: "smooth" }); },
+  saveProfile,
+  signout: () => { S.user = null; persist(); store.del("user"); toast("Signed out"); nav("/"); },
+  linkedin: () => window.open(S.liUrl, "_blank", "noopener"),
+  printCert: () => window.print(),
+  whatsapp: () => window.open("https://wa.me/?text=" + encodeURIComponent(S.shareText), "_blank", "noopener"),
+  copyLink: async () => { try { await navigator.clipboard.writeText(S.shareLink); toast("Link copied"); } catch (e) { prompt("Copy this link", S.shareLink); } }
+};
+
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-act]");
+  if (!e.target.closest(".combo")) $$("[data-combo]").forEach(i => hideUniList(i.id));
+  if (!a) return;
+  const f = actions[a.dataset.act]; if (f) f(a);
+});
+document.addEventListener("input", e => {
+  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
+  S.form[k] = t.value;
+  if (t.dataset.combo) renderUniList(t.id);
+  if (t.dataset.live === "explore") { const q = t.value.toLowerCase(); const list = Object.keys(ROLES).filter(x => !q || ROLES[x].title.toLowerCase().includes(q) || ROLES[x].skills.join(" ").toLowerCase().includes(q)); $("#exlist").innerHTML = list.map(roleCard).join("") || '<p class="muted">No roles match your search.</p>'; }
+  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
+});
+document.addEventListener("change", e => {
+  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
+  S.form[k] = t.value;
+  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
+});
+document.addEventListener("focusin", e => { if (e.target.dataset && e.target.dataset.combo) renderUniList(e.target.id); });
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.combo) {
+    if (e.key === "Escape") hideUniList(t.id);
+    if (e.key === "Enter") { e.preventDefault(); const first = $("#" + t.id + "-list button[data-v]"); if (first) { t.value = first.dataset.v; S.form[t.dataset.f] = t.value; hideUniList(t.id); } }
+  }
+  if (t.id === "fu-in" && e.key === "Enter") actions.fuSend();
+});
+$("#file").addEventListener("change", e => { const f = e.target.files[0]; if (f) handleFile(f); e.target.value = ""; });
+window.addEventListener("hashchange", route);
+
+applyTheme();
+route();
