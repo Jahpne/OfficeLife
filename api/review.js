@@ -1,6 +1,6 @@
 // api/review.js  (Vercel serverless function)
 // Your token lives in an environment variable called HF_TOKEN. Never write it in this file.
-const MODEL = process.env.HF_MODEL || "meta-llama/Llama-3.2-11B-Vision-Instruct"; // change in Vercel settings if it ever disappears
+const MODEL = process.env.HF_MODEL || "mQwen/Qwen2.5-VL-3B-Instruct"; // change in Vercel settings if it ever disappears
 const ENDPOINT = "https://router.huggingface.co/v1/chat/completions";
 
 // ---------- scripted fallback (works with no AI) ----------
