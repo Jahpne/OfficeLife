@@ -240,6 +240,8 @@ swe:{
 
 
 /* ============================ DATA ANALYST ============================ */
+
+/* ============================ DATA ANALYST ============================ */
 da:{
   id:"da", title:"Data Analyst", short:"DA", manager:"ngozi", cls:"g",
   blurb:"Turn messy delivery data into a recommendation the CEO can act on.",
@@ -255,21 +257,21 @@ da:{
       {label:"Build charts straight away",score:35,resp:"You would be charting errors. Inspect first."},
       {label:"Delete any row that looks strange",score:30,resp:"Deleting without a rule changes the story. Document every change."}]},
     {t:"10:00",type:"task",title:"Clean the data and summarise your changes",
-      brief:"You have 5,000 delivery rows. Clean the duplicates and missing city names, then write a short note on what you changed, with counts before and after. Upload a file or type your note.",
+      brief:"You have 5,000 delivery rows. Clean the duplicates and missing city names, then write a short note on what you changed, with counts before and after.",
       due:"11:15 AM",minWords:40,
       rubric:[
-        {label:"Duplicates handled",keywords:["duplicate","dedupe","removed","repeated"],fix:"Say how you handled duplicate rows."},
-        {label:"Missing values handled",keywords:["missing","blank","null","empty","fill","city"],fix:"Say how you handled missing city names."},
-        {label:"Counts before and after",keywords:["before","after","rows","count","from","to "],fix:"Give counts, for example 5,000 rows before and 4,780 after."},
-        {label:"Reasoning",keywords:["because","so that","to avoid","accuracy","reason"],fix:"Explain why you made each change."}],
+        {label:"Audit Trail",keywords:["before","after","rows","count","from","to"],fix:"Show exact row counts before and after (e.g., 5,000 to 4,810)."},
+        {label:"Missing Value Justification",keywords:["missing","null","dropped","filled","because"],fix:"Justify why duplicates were dropped or missing values were filled."},
+        {label:"Quantified Insight",keywords:["%","percent","number","data","volume"],fix:"Use specific percentages or numbers to prove the claim."},
+        {label:"Actionable Recommendation",keywords:["recommend","pilot","timeline","next step","approve","owner"],fix:"End with a specific next step, timeline, and owner."}],
       sampleName:"cleaning-notes.txt",
-      sampleBad:"Cleaning notes. I removed the duplicate rows from the delivery sheet and checked the file again to make sure it looks neat and tidy. The data is now ready for use by the operations team and the managers who need the report for their meetings.",
-      sampleGood:"Cleaning notes. Before: 5,000 rows. I removed 190 duplicate rows because the same order was recorded twice and would inflate delivery counts. 30 rows had missing city names; I filled 22 from the delivery address and marked 8 as unknown. After: 4,810 rows. Every change is logged so it can be checked."},
+      sampleBad:"Cleaning notes. I removed the duplicate rows from the delivery sheet and checked the file again to make sure it looks neat and tidy. The data is now ready for use by the operations team.",
+      sampleGood:"Cleaning notes. Before: 5,000 rows. Removed 190 duplicates because the same order was recorded twice. 30 rows had missing city names; filled 22 from address, marked 8 unknown. After: 4,810 rows. Changes logged."},
     {t:"11:05",type:"followup",from:"ngozi",q:"Why did you remove duplicates instead of averaging them?",keywords:["same order","twice","inflate","double","count","because","accuracy","one record"],minWords:8,
       good:"Right. Duplicates inflate counts, so one record per order is correct.",weak:"Think about what happens to counts if one order appears twice."},
     {t:"11:30",type:"decision",q:"The ops head wants a chart in 20 minutes",
-      a:{title:"Send a quick chart with a clear note that numbers are preliminary",detail:"Femi gets something now and knows its limits.",score:100,fb:"Good call. Fast and honest. People can act without being misled."},
-      b:{title:"Send the chart without mentioning it is unverified",detail:"It looks clean and finished.",score:30,fb:"That risks decisions based on unchecked numbers. Always label preliminary work."}},
+      a:{title:"Send a quick chart with a clear note that numbers are preliminary",detail:"Femi gets something now and knows its limits.",score:100,fb:"Good call. Fast and honest."},
+      b:{title:"Send the chart without mentioning it is unverified",detail:"It looks clean and finished.",score:30,fb:"That risks decisions based on unchecked numbers."}},
     {t:"13:00",type:"break"},
     {t:"14:30",type:"quiz",q:"A few deliveries took 5 days while most took 1 day. Which measure best shows a typical delivery time?",
       options:["Mean","Median","Maximum","Minimum"],correct:1,why:"The median is not pulled up by a few extreme values."}
@@ -281,20 +283,20 @@ da:{
       {label:"Agree, to keep Ops happy",score:20,resp:"I would be misled if the data says otherwise."},
       {label:"Ignore the message",score:40,resp:"I still need an answer, please reply."}]},
     {t:"10:00",type:"task",title:"Write 3 insights with numbers",
-      brief:"Late deliveries are 18% of orders. Write 3 insights, each with a number, a likely cause and a recommendation. Upload a file or type your insights.",
+      brief:"Late deliveries are 18% of orders. Write 3 insights, each with a number, a likely cause and a recommendation.",
       due:"11:15 AM",minWords:50,
       rubric:[
         {label:"Uses numbers",keywords:["%","percent","times","average","rows","orders"],fix:"Support each insight with a number or percentage."},
         {label:"Explains a cause",keywords:["because","due to","caused by","driven by","reason"],fix:"Explain a likely cause for each insight."},
         {label:"Recommends action",keywords:["recommend","should","suggest","action","improve"],fix:"Add a recommendation for each insight."},
-        {label:"Specific to deliveries",keywords:["delivery","late","route","city","driver","traffic","time"],fix:"Keep insights specific to deliveries, such as routes, cities or time of day."}],
+        {label:"Specific to deliveries",keywords:["delivery","late","route","city","driver","traffic","time"],fix:"Keep insights specific to deliveries."}],
       sampleName:"insights.txt",
-      sampleBad:"Insight 1: Lagos has many late deliveries compared with other cities and this may be a problem for the company. Insight 2: Evening orders seem to be delayed more often than morning orders in most of the city areas we serve. Insight 3: Some drivers have more late orders.",
-      sampleGood:"Insight 1: 31% of late deliveries are in Lagos Island because of traffic after 4 PM; recommend dispatching earlier there. Insight 2: orders placed after 6 PM are late 27% of the time due to fewer drivers on shift; we should add evening drivers. Insight 3: 3 routes cause 40% of delays; suggest reviewing those routes."},
+      sampleBad:"Insight 1: Lagos has many late deliveries. Insight 2: Evening orders seem to be delayed more often. Insight 3: Some drivers have more late orders.",
+      sampleGood:"Insight 1: 31% of late deliveries are in Lagos Island due to traffic after 4 PM; recommend dispatching earlier. Insight 2: Orders after 6 PM are late 27% of the time due to fewer drivers; add evening drivers. Insight 3: 3 routes cause 40% of delays; review those routes."},
     {t:"11:05",type:"followup",from:"ngozi",q:"Which insight would you act on first, and why?",keywords:["because","impact","largest","most","biggest","percent","%","easy","fastest","cost"],minWords:8,
       good:"Good prioritisation. You tied the choice to impact.",weak:"Choose one insight and give a reason, such as the biggest impact."},
     {t:"11:30",type:"decision",q:"Your data does not match the CEO's belief",
-      a:{title:"Present the finding with evidence, politely",detail:"The data shows the delays come from evening staffing, not driver effort.",score:100,fb:"Right. Honest analysis with evidence is your job, even when it is uncomfortable."},
+      a:{title:"Present the finding with evidence, politely",detail:"The data shows the delays come from evening staffing, not driver effort.",score:100,fb:"Right. Honest analysis with evidence is your job."},
       b:{title:"Soften the finding so it fits what the CEO expects",detail:"Avoid a difficult conversation.",score:30,fb:"Hiding what the data shows destroys your value as an analyst."}},
     {t:"13:00",type:"break"},
     {t:"14:30",type:"quiz",q:"A chart's y-axis starts at 90 instead of 0, making a small change look huge. This is:",
@@ -307,7 +309,7 @@ da:{
       {label:"Walk through how I cleaned the data first",score:45,resp:"Too much process. Lead with the answer."},
       {label:"Show every chart I made",score:30,resp:"Too much. Pick the one or two that prove the point."}]},
     {t:"10:00",type:"task",title:"Write a 5-line executive summary",
-      brief:"Write a short executive summary for the CEO: the key finding, the evidence, your recommendation and the next step. Upload a file or type it.",
+      brief:"Write a short executive summary for the CEO: the key finding, the evidence, your recommendation and the next step.",
       due:"11:15 AM",minWords:45,
       rubric:[
         {label:"Key finding first",keywords:["finding","found","shows","main","key"],fix:"Open with the key finding."},
@@ -315,21 +317,19 @@ da:{
         {label:"Recommendation",keywords:["recommend","should","suggest","propose"],fix:"State a clear recommendation."},
         {label:"Next step",keywords:["next","by ","timeline","decision","approve","pilot"],fix:"End with a next step and who decides."}],
       sampleName:"executive-summary.txt",
-      sampleBad:"Executive summary. We looked at the delivery data for the whole month and prepared a lot of charts and tables for review. The team worked on cleaning, checking and analysing everything carefully, and we are happy to share more details whenever the leadership team has time.",
-      sampleGood:"Key finding: late deliveries are driven by evening staffing, not driver effort. Evidence: orders after 6 PM are late 27% of the time, against 9% earlier in the day. Recommendation: add evening drivers on our 3 busiest routes. Next step: approve a 2-week pilot by Friday and review the results the following Monday."},
+      sampleBad:"Executive summary. We looked at the delivery data for the whole month and prepared a lot of charts for review. The team worked on cleaning and analysing everything carefully.",
+      sampleGood:"Key finding: late deliveries are driven by evening staffing, not driver effort. Evidence: orders after 6 PM are late 27% of the time, against 9% earlier. Recommendation: add evening drivers on our 3 busiest routes. Next step: approve a 2-week pilot by Friday."},
     {t:"11:05",type:"followup",from:"ngozi",q:"The CEO may ask: how sure are you? What would you say?",keywords:["confident","sure","limit","caveat","sample","data","verify","because","uncertain","check"],minWords:8,
       good:"Honest about certainty. That builds trust.",weak:"Mention how confident you are and one limit of the data."},
     {t:"11:30",type:"decision",q:"The CEO asks for a number you have not verified",
       a:{title:"Say you will confirm it by 3 PM",detail:"Give an honest time to come back with a checked number.",score:100,fb:"Perfect. Honesty and a clear deadline build trust."},
-      b:{title:"Give your best guess as if it is certain",detail:"Sound confident in the room.",score:30,fb:"An unchecked number stated as fact can cost you credibility, and decisions."}},
+      b:{title:"Give your best guess as if it is certain",detail:"Sound confident in the room.",score:30,fb:"An unchecked number stated as fact can cost you credibility."}},
     {t:"13:00",type:"break"},
     {t:"14:30",type:"quiz",q:"What should come first in an executive summary?",
       options:["The data cleaning steps","The key finding or recommendation","A list of all charts","Your job title"],correct:1,why:"Busy leaders read the first lines. Put the answer first."}
   ]}
   ]
-}
-};
-
+},
 /* ---------- Premium mentors (sample profiles) ---------- */
 const MENTORS = [
   {id:"m1",name:"Sample Mentor A",title:"Senior Product Manager, fintech",role:"pm",slots:["Sat 10:00 AM","Sat 2:00 PM","Sun 4:00 PM"],color:"#5B2BC4",ini:"SA"},
