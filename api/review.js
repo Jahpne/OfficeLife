@@ -40,21 +40,20 @@ async function askModel({ task, rubric, text, imageDataUrl }) {
   const content = [{ type: "text", text: instruction }];
   if (text) content.push({ type: "text", text: `Submission text:\n${text.slice(0, 6000)}` });
   if (imageDataUrl) content.push({ type: "image_url", image_url: { url: imageDataUrl } });
-
-  const res = await fetch(ENDPOINT, {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.HF_TOKEN}`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    // Force the Novita provider using the colon syntax
-    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:novita", 
-    messages: [{ role: "user", content }],
-    max_tokens: 300,
-    temperature: 0.2
-  })
-});
+const res = await fetch(ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.HF_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      // This will use whatever you set in Vercel, without forcing a provider
+      model: MODEL, 
+      messages: [{ role: "user", content }],
+      max_tokens: 300,
+      temperature: 0.2
+    })
+  });
   if (!res.ok) { const body = await res.text().catch(() => ""); throw new Error(`Model error ${res.status}: ${body.slice(0, 200)}`); }
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || "";
