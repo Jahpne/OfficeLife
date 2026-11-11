@@ -1,6 +1,6 @@
 // api/review.js  (Vercel serverless function)
 // Your token lives in an environment variable called HF_TOKEN. Never write it in this file.
-const MODEL = process.env.HF_MODEL || "Qwen/Qwen2.5-VL-7B-Instruct"; // change in Vercel settings if it ever disappears
+const MODEL = process.env.HF_MODEL || "meta-llama/Llama-3.2-11B-Vision-Instruct"; // change in Vercel settings if it ever disappears
 const ENDPOINT = "https://router.huggingface.co/v1/chat/completions";
 
 // ---------- scripted fallback (works with no AI) ----------
@@ -45,11 +45,11 @@ async function askModel({ task, rubric, text, imageDataUrl }) {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.HF_TOKEN}`,
-    "Content-Type": "application/json",
-    "X-Provider": "hyperbolic" // <-- Forces routing to the active hosting provider
+    "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    model: "Qwen/Qwen2.5-VL-7B-Instruct",
+    // Force the Novita provider using the colon syntax
+    model: "meta-llama/Llama-3.2-11B-Vision-Instruct:novita", 
     messages: [{ role: "user", content }],
     max_tokens: 300,
     temperature: 0.2
