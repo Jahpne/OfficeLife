@@ -54,6 +54,7 @@ const DAY_PLAN = [
 /* ---------- ROLES ---------- */
 const ROLES = {
 /* ============================ PROJECT MANAGER ============================ */
+/* ============================ PROJECT MANAGER ============================ */
 pm:{
   id:"pm", title:"Project Manager", short:"PM", manager:"chidi", cls:"",
   blurb:"Run the launch of a delivery app for a Lagos logistics startup.",
@@ -73,13 +74,13 @@ pm:{
       brief:"Create a one-page plan for Driver App 2.0 with the goal, key milestones with dates, owners and the top 2 risks. Upload a file or type your plan.",
       due:"11:15 AM",minWords:40,
       rubric:[
-        {label:"Clear goal",keywords:["goal","objective","launch","aim"],fix:"State the goal in one line, for example launch Driver App 2.0 by a date."},
-        {label:"Milestones with dates",keywords:["milestone","week","deadline","phase","day "],fix:"Add milestones with dates, for example design handoff, payments done, testing, launch."},
-        {label:"Owners",keywords:["owner","responsible","assigned","lead","tunde","amina","bisi"],fix:"Name an owner for each milestone, for example Tunde for payments, Amina for design."},
-        {label:"Risks",keywords:["risk","delay","blocker","mitigat","backup"],fix:"List the top 2 risks and how you will reduce each one."}],
+        {label:"Clarity of Goal",keywords:["goal","objective","launch","aim","measurable"],fix:"State a single, measurable launch objective."},
+        {label:"Dependencies mapped",keywords:["milestone","sequence","before","after","dependency","handover"],fix:"Sequence milestones logically (e.g., API integration before payment testing)."},
+        {label:"Actionable Risk Response",keywords:["mitigat","backup","contingency","owner","action"],fix:"Give each risk a specific mitigation action and a single accountable owner."},
+        {label:"Buffer",keywords:["buffer","extra time","slip","risk","contingency"],fix:"Acknowledge the bank API timeout risk and allocate a buffer."}],
       sampleName:"driver-app-plan.pdf",
-      sampleBad:"Driver App 2.0 plan. Goal: launch the app in two weeks. Milestones: design handoff, payments screen, testing, launch. The team will work hard to finish everything on time and keep the client happy during the whole project period.",
-      sampleGood:"Driver App 2.0 plan. Goal: launch the app to all drivers in two weeks. Milestones: design handoff on Wednesday, payments screen done Friday, testing next Tuesday, launch next Thursday. Owners: Amina for design, Tunde for payments, Bisi for testing, me for coordination. Risks: the bank API may delay payments, so Tunde will build a backup flow; testing may slip, so Bisi starts early."},
+      sampleBad:"Driver App 2.0 plan. Goal: launch the app in two weeks. Milestones: design handoff, payments screen, testing, launch. The team will work hard to finish everything on time and keep the client happy.",
+      sampleGood:"Driver App 2.0 plan. Goal: launch the app in 2 weeks. Milestones: Design handoff Wed, Payments screen Fri (with 2-day buffer for API issues), Testing Tues, Launch Thurs. Owners: Amina, Tunde, Bisi. Risks: Bank API timeouts (Tunde to build fallback); Design delays (Amina to review daily)."},
     {t:"11:05",type:"followup",from:"chidi",q:"I saw your plan. In one or two sentences, why did you set the milestone dates the way you did?",
       keywords:["because","depends","dependency","buffer","payments","api","testing","time","risk","critical"],minWords:8,
       good:"That shows real thinking. Dates need a reason, not just a guess.",weak:"Try to link each date to a dependency, such as payments before testing."},
@@ -106,8 +107,8 @@ pm:{
         {label:"Response plan",keywords:["mitigat","backup","plan b","response","reduce","prevent","contingency"],fix:"Add a response for each risk, such as a backup plan."},
         {label:"Specific risks",keywords:["api","payment","delay","budget","scope","bug","client","testing"],fix:"Name real project risks, such as the payments API, scope changes or testing time."}],
       sampleName:"risk-register.pdf",
-      sampleBad:"Risk register for Driver App 2.0. Risk 1: payments API delay. Risk 2: the client may change the scope. Risk 3: testing may take longer. Risk 4: a developer falls sick. Risk 5: the budget may not be enough for the extra work we are planning.",
-      sampleGood:"Risk register. 1) Payments API delay: likelihood high, impact high, owner Tunde, response build a backup flow. 2) Scope change from the client: likelihood medium, impact high, owner me, response a change-request process. 3) Testing runs late: likelihood medium, impact medium, owner Bisi, response start testing early. 4) Developer absence: likelihood low, impact medium, owner Tunde, response share knowledge. 5) Budget overrun: likelihood low, impact high, owner me, response weekly cost check."},
+      sampleBad:"Risk register for Driver App 2.0. Risk 1: payments API delay. Risk 2: the client may change the scope. Risk 3: testing may take longer. Risk 4: a developer falls sick. Risk 5: the budget may not be enough for the extra work.",
+      sampleGood:"Risk register. 1) Payments API delay: likelihood high, impact high, owner Tunde, response build a backup flow. 2) Scope change from client: likelihood medium, impact high, owner me, response a change-request process. 3) Testing runs late: likelihood medium, impact medium, owner Bisi, response start testing early."},
     {t:"11:05",type:"followup",from:"chidi",q:"Which of your five risks worries you most, and why?",keywords:["because","payment","api","impact","launch","delay","most","client","scope"],minWords:8,
       good:"Good. Naming one top risk and a reason is what leaders need.",weak:"Pick one risk and say what happens if it goes wrong."},
     {t:"11:30",type:"decision",q:"The client wants a new feature",
@@ -132,8 +133,8 @@ pm:{
         {label:"Risk and plan",keywords:["risk","plan","fix","workaround","monitor","support"],fix:"Explain the risk and your plan, such as a workaround and a fix next week."},
         {label:"Next step",keywords:["next","tomorrow","approve","decision","need"],fix:"End with what you need from the CEO, such as approval."}],
       sampleName:"go-no-go.pdf",
-      sampleBad:"Hello CEO. The team has worked hard and the app is nearly ready. We found a small issue with the profile photo not refreshing until the app is restarted. Everyone is doing their best and we hope tomorrow goes well for all drivers and customers.",
-      sampleGood:"Hello CEO. I recommend we go ahead and launch tomorrow. One minor bug remains: the driver profile photo only refreshes after a restart. The risk is low because drivers can still deliver. My plan: support will share a simple workaround, Tunde ships the fix next week, and we monitor feedback daily. I need your approval by 5 PM today."},
+      sampleBad:"Hello CEO. The team has worked hard and the app is nearly ready. We found a small issue with the profile photo not refreshing until the app is restarted. Everyone is doing their best and we hope tomorrow goes well.",
+      sampleGood:"Hello CEO. I recommend we go ahead and launch tomorrow. One minor bug remains: the profile photo only refreshes after a restart. The risk is low. My plan: support will share a workaround, Tunde ships the fix next week, and we monitor daily. I need your approval by 5 PM."},
     {t:"11:05",type:"followup",from:"chidi",q:"Why do you think launching with a minor bug is acceptable here?",keywords:["because","minor","impact","drivers","workaround","low","risk","delay","cost"],minWords:8,
       good:"Clear reasoning. You weighed impact against cost of delay.",weak:"Explain the impact of the bug versus the cost of delaying launch."},
     {t:"11:30",type:"decision",q:"Launch with a known bug?",
@@ -145,7 +146,6 @@ pm:{
   ]}
   ]
 },
-
 /* ============================ JUNIOR SOFTWARE ENGINEER ============================ */
 swe:{
   id:"swe", title:"Junior Software Engineer", short:"SWE", manager:"tunde", cls:"v",
@@ -165,13 +165,13 @@ swe:{
       brief:"Stop the Pay button from sending a second request while the first is still running. Write your pull request description, or upload a screenshot of your code change.",
       due:"11:15 AM",minWords:40,
       rubric:[
-        {label:"Explains the cause",keywords:["double","twice","two requests","second request","duplicate","cause"],fix:"Explain the cause: two requests are sent when the button is tapped twice."},
-        {label:"Describes the fix",keywords:["disable","loading","flag","lock","in flight","pending","debounce"],fix:"Describe the fix, for example disabling the button while the request is running."},
-        {label:"Error handling",keywords:["error","fail","catch","retry","re-enable","finally"],fix:"Say what happens if the request fails, such as re-enabling the button."},
-        {label:"How it was tested",keywords:["test","tested","verified","reproduce","checked"],fix:"Say how you tested it."}],
+        {label:"Root Cause",keywords:["double","twice","race","timeout","retry","cause"],fix:"Identify the root cause (e.g., double-tap or network timeout retry)."},
+        {label:"Implementation specific",keywords:["disable","loading","idempotency","key","state","flag"],fix:"Mention the technical solution (e.g., idempotency key, loading state)."},
+        {label:"Failure path handled",keywords:["fail","error","catch","re-enable","retry"],fix:"Explain what happens when the API request fails."},
+        {label:"Verification",keywords:["test","unit","manual","reproduce","verified","stripe"],fix:"List specific test cases proving the fix works."}],
       sampleName:"tkt-214-pr.txt",
-      sampleBad:"Fixed TKT-214. The Pay button was charging users twice because it sent two requests when tapped quickly. I changed the button code so it only sends one request. Please review my changes and merge them when you can because the team wants this fixed soon.",
-      sampleGood:"PR for TKT-214. Cause: a double tap sent two requests, so users were charged twice. Fix: I disable the Pay button and show a loading state while the request is in flight. If the request fails, the button is re-enabled in a finally block so the user can retry. Tested: I reproduced the bug locally, confirmed one request after the fix, and checked the failure path."},
+      sampleBad:"Fixed TKT-214. The Pay button was charging users twice because it sent two requests when tapped quickly. I changed the button code so it only sends one request. Please review my changes.",
+      sampleGood:"PR for TKT-214. Cause: A network timeout caused the client to retry a charge request that had already succeeded, and the button lacked debounce protection. Fix: Generated a unique idempotency key per session; added an isSubmitting state to disable the button. Testing: Unit test noDuplicateChargeOnRetry passes; manually simulated a 30s timeout and confirmed only one charge."},
     {t:"11:05",type:"followup",from:"tunde",q:"Why disable the button instead of hiding it or adding a delay?",keywords:["because","user","feedback","loading","retry","reliable","delay","race","clear"],minWords:8,
       good:"Good reasoning. A disabled loading state is clear to users and reliable.",weak:"Think about what the user sees and whether a delay would really prevent the second request."},
     {t:"11:30",type:"decision",q:"Two urgent things, one hour",
@@ -189,7 +189,7 @@ swe:{
       {label:"Yes, we can add them later",score:30,resp:"Later usually means never. Please add them now."},
       {label:"Ask Tunde to decide",score:55,resp:"Fine, but come with your own view next time."}]},
     {t:"10:00",type:"task",title:"Write 3 unit tests",
-      brief:"Write 3 unit tests for the Pay button fix: normal tap, double tap, and failed request. Paste your test names and what each checks, or upload a screenshot of tests passing.",
+      brief:"Write 3 unit tests for the Pay button fix: normal tap, double tap, and failed request. Paste your test names and what each checks.",
       due:"11:15 AM",minWords:35,
       rubric:[
         {label:"Normal tap",keywords:["normal","single","one tap","once","success"],fix:"Add a test for a normal single tap."},
@@ -197,8 +197,8 @@ swe:{
         {label:"Failed request",keywords:["fail","error","reject","retry","re-enable"],fix:"Add a test for a failed request."},
         {label:"Clear checks",keywords:["expect","assert","should","checks","calls"],fix:"Say what each test checks, for example expects one call."}],
       sampleName:"tests.txt",
-      sampleBad:"Test 1: normal tap. It checks that one tap sends the payment request and shows success to the user. Test 2: double tap. It checks that tapping quickly does not cause problems in the application when the user is in a hurry to pay.",
-      sampleGood:"Test 1, normal tap: expect one payment call and a success message. Test 2, double tap: tap twice quickly and assert only one request is sent. Test 3, failed request: mock an error, expect the button to be re-enabled so the user can retry. All three tests pass."},
+      sampleBad:"Test 1: normal tap. It checks that one tap sends the payment request and shows success. Test 2: double tap. It checks that tapping quickly does not cause problems when the user is in a hurry to pay.",
+      sampleGood:"Test 1, normal tap: expect one payment call and a success message. Test 2, double tap: tap twice quickly and assert only one request is sent. Test 3, failed request: mock an error, expect the button to be re-enabled. All three tests pass."},
     {t:"11:05",type:"followup",from:"bisi",q:"Which of your three tests would catch the original bug, and why?",keywords:["double","twice","because","second","request","one","catch"],minWords:8,
       good:"Exactly. The double-tap test protects against this bug coming back.",weak:"Name the test and say what it would detect."},
     {t:"11:30",type:"decision",q:"A small fix is needed in production",
@@ -214,7 +214,7 @@ swe:{
       {label:"Deploy and go for lunch",score:20,resp:"Never leave a release unwatched."},
       {label:"Ask someone else to deploy",score:50,resp:"You should learn the deploy process yourself."}]},
     {t:"10:00",type:"task",title:"Write a short post-mortem",
-      brief:"Write a half-page post-mortem on the double-charge bug: what happened, why, how you fixed it and how to prevent it. Upload a file or type it.",
+      brief:"Write a half-page post-mortem on the double-charge bug: what happened, why, how you fixed it and how to prevent it.",
       due:"11:15 AM",minWords:50,
       rubric:[
         {label:"What happened",keywords:["happened","charged twice","double charge","impact","users"],fix:"Say what happened and who was affected."},
@@ -222,12 +222,12 @@ swe:{
         {label:"The fix",keywords:["fix","disable","loading","resolved","patched"],fix:"Describe how it was fixed."},
         {label:"Prevention",keywords:["prevent","test","review","monitor","idempotency","alert"],fix:"Say how to prevent it, such as tests, review or idempotency keys."}],
       sampleName:"post-mortem.txt",
-      sampleBad:"Post-mortem. Some users were charged twice when they paid for deliveries through the Driver App. The bug was caused by the button sending two requests. We fixed it by disabling the button after the first tap and everyone on the team worked well together.",
-      sampleGood:"Post-mortem. What happened: some drivers were charged twice at payment. Root cause: a double tap sent two requests because the button stayed active. Fix: the button is now disabled with a loading state while the request runs. Prevention: unit tests for double taps, an idempotency key on the payment API, and an alert for duplicate charges."},
+      sampleBad:"Post-mortem. Some users were charged twice. The bug was caused by the button sending two requests. We fixed it by disabling the button and everyone worked well together.",
+      sampleGood:"Post-mortem. What happened: drivers were charged twice. Root cause: a double tap sent two requests. Fix: button is now disabled with a loading state. Prevention: unit tests for double taps, an idempotency key, and an alert for duplicate charges."},
     {t:"11:05",type:"followup",from:"tunde",q:"What is one thing you would do differently next time?",keywords:["test","earlier","review","would","next time","monitor","check","because"],minWords:8,
       good:"Self-awareness like that makes a strong engineer.",weak:"Pick one concrete thing, like writing the test first."},
     {t:"11:30",type:"decision",q:"It is Friday, 4:30 PM",
-      a:{title:"Release now with one reviewer offline",detail:"The fix is ready and the team wants it done.",score:40,fb:"A late Friday release with less coverage is risky. If it breaks, nobody is around to help."},
+      a:{title:"Release now with one reviewer offline",detail:"The fix is ready and the team wants it done.",score:40,fb:"A late Friday release with less coverage is risky."},
       b:{title:"Release Monday morning",detail:"The whole team is online and can react quickly.",score:100,fb:"Good judgement. Ship when you can support what you ship."}},
     {t:"13:00",type:"break"},
     {t:"14:30",type:"quiz",q:"A new release breaks checkout. What is the fastest safe action?",
@@ -235,6 +235,9 @@ swe:{
   ]}
   ]
 },
+/* ============================ JUNIOR SOFTWARE ENGINEER ============================ */
+
+
 
 /* ============================ DATA ANALYST ============================ */
 da:{
