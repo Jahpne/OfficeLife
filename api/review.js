@@ -42,18 +42,19 @@ async function askModel({ task, rubric, text, imageDataUrl }) {
   if (imageDataUrl) content.push({ type: "image_url", image_url: { url: imageDataUrl } });
 
   const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.HF_TOKEN}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [{ role: "user", content }],
-      max_tokens: 300,
-      temperature: 0.2
-    })
-  });
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.HF_TOKEN}`,
+    "Content-Type": "application/json",
+    "X-Provider": "hyperbolic" // <-- Forces routing to the active hosting provider
+  },
+  body: JSON.stringify({
+    model: "Qwen/Qwen2.5-VL-7B-Instruct",
+    messages: [{ role: "user", content }],
+    max_tokens: 300,
+    temperature: 0.2
+  })
+});
   if (!res.ok) { const body = await res.text().catch(() => ""); throw new Error(`Model error ${res.status}: ${body.slice(0, 200)}`); }
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || "";
