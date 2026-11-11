@@ -25,7 +25,7 @@ function dashboard() {
 
     <section class="sect"><h2>${certs.length ? "Start another simulation" : "Start your first workday"}</h2>
       <p class="lead">Pick a role. Each workday takes 10 to 15 minutes.</p>
-      <div class="grid3">${["pm", "swe", "da"].map(roleCard).join("")}</div></section>
+ <div class="grid3">${["pm", "swe", "da", "hr"].map(roleCard).join("")}</div>
 
     ${certs.length ? `<section class="sect"><h2>Your certificates</h2><div class="grid2" style="margin-top:12px">
       ${certs.slice().reverse().map((c, i) => `<div class="card"><div class="row"><div class="org ${role(c.role).cls}">${role(c.role).short}</div><div><b>${role(c.role).title}</b><div class="small muted">${c.n}-day simulation &middot; ${prettyDate(c.date)}</div></div></div>
