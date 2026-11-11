@@ -31,14 +31,14 @@ const UNIS = [
 ];
 
 const LEVELS = ["100 level","200 level","300 level","400 level","500 level","Graduate (NYSC or waiting)","Graduated"];
-
 const PEOPLE = {
   chidi:{name:"Chidi Eze",role:"Head of Product",color:"#5B2BC4",ini:"CE"},
   tunde:{name:"Tunde Alabi",role:"Engineering Lead",color:"#0B6E5B",ini:"TA"},
   amina:{name:"Amina Bello",role:"Product Designer",color:"#B4326E",ini:"AB"},
   bisi:{name:"Bisi Okon",role:"QA Engineer",color:"#A65A00",ini:"BO"},
   ngozi:{name:"Ngozi Obi",role:"Head of Data",color:"#0A5FA8",ini:"NO"},
-  femi:{name:"Femi Adeyemi",role:"Operations Manager",color:"#8A3B12",ini:"FA"}
+  femi:{name:"Femi Adeyemi",role:"Operations Manager",color:"#8A3B12",ini:"FA"},
+  zainab:{name:"Zainab Yusuf",role:"HR Director",color:"#D93900",ini:"ZY"} // <-- ADDED
 };
 
 const DAY_PLAN = [
@@ -330,6 +330,95 @@ da:{
   ]}
   ]
 },
+   
+/* ============================ HR PERSONNEL ============================ */
+hr:{
+  id:"hr", title:"HR Personnel", short:"HR", manager:"zainab", cls:"",
+  blurb:"Source, screen, and hire top talent for a growing tech startup.",
+  learn:["Write a job description that attracts the right candidates","Screen CVs objectively without unconscious bias","Conduct structured interviews and make an offer"],
+  skills:["Sourcing","Screening","Interviewing","Bias mitigation","Negotiation","Onboarding"],
+  jobs:"Recruiter, HR Assistant, Talent Acquisition Specialist",
+  days:[
+  {theme:"Sourcing the right talent",steps:[
+    {t:"09:05",type:"msg",from:"zainab",text:"Morning. We need to hire a Junior Data Analyst by next month. I need you to draft the Job Description and figure out where to post it."},
+    {t:"09:30",type:"msg",from:"femi",text:"Ops here. Please make sure the JD mentions they will have to work some weekends. We are desperate."},
+    {t:"09:45",type:"reply",from:"zainab",text:"How do you handle Femi's request?",options:[
+      {label:"Add it, but frame it as 'occasional weekend coverage' with time off in lieu",score:100,resp:"Good. Honest, but attractive."},
+      {label:"Tell Femi no, that will scare candidates away",score:40,resp:"We can't hide the reality of the job, it leads to quick turnover."},
+      {label:"Leave it out, they can find out later",score:10,resp:"Never bait and switch. That damages our employer brand."}]},
+    {t:"10:00",type:"task",title:"Draft the Job Description",
+      brief:"Write a 3-paragraph JD for a Junior Data Analyst. Include: 1) The impact they will have, 2) Key responsibilities, 3) Required skills. Avoid gender-coded language.",
+      due:"11:15 AM",minWords:40,
+      rubric:[
+        {label:"Impact First",keywords:["impact","mission","help","grow","business","team"],fix:"Start with why the role matters."},
+        {label:"Clear Responsibilities",keywords:["responsibilities","will","tasks","build","analyze","report"],fix:"List 3-4 specific daily tasks."},
+        {label:"Inclusive Language",keywords:["collaborate","support","experience","skills","team"],fix:"Avoid aggressive words (e.g., 'ninja', 'dominant') and use inclusive phrasing."},
+        {label:"Must-haves vs Nice-to-haves",keywords:["required","preferred","bonus","must","plus"],fix:"Separate essential skills from bonus skills."}],
+      sampleName:"jd-draft.pdf",
+      sampleBad:"We need a Data Ninja to dominate our data. You must be aggressive and crush numbers. Requirements: SQL, Python, 5 years experience. You will work alone to build dashboards.",
+      sampleGood:"About the role: We are looking for a Junior Data Analyst to help Tembea Logistics optimize delivery routes. You will collaborate with our operations team to build dashboards and find insights. Responsibilities include cleaning data, running weekly reports, and presenting findings. Required: 1 year experience with SQL or Excel. Preferred: Python or Tableau."},
+    {t:"11:05",type:"followup",from:"zainab",q:"Why did you separate required and preferred skills?",keywords:["because","attract","applicants","overqualified","fair","diverse","pipeline"],minWords:8,
+      good:"Exactly. It widens the pool and prevents great candidates from self-selecting out.",weak:"Think about how strict requirements affect who applies."},
+    {t:"11:30",type:"decision",q:"Where to post the job",
+      a:{title:"Pay $200 for a premium LinkedIn post",detail:"Guarantees high visibility and passive candidates.",score:60,fb:"LinkedIn is good, but expensive for a junior role. You need volume and diversity."},
+      b:{title:"Post on free university job boards and Twitter/X",detail:"Targets fresh graduates directly where they hang out.",score:100,fb:"Smart. Cost-effective and targets the exact demographic you need."}},
+    {t:"13:00",type:"break"},
+    {t:"14:30",type:"quiz",q:"Which of these is an example of gender-coded language in a JD?",
+      options:["We are looking for a collaborative team player","You are a dominant and aggressive go-getter","You have strong analytical skills","We offer flexible working hours"],correct:1,why:"Words like 'dominant' and 'aggressive' are statistically proven to deter female applicants."}
+  ]},
+  {theme:"Screening without bias",steps:[
+    {t:"09:00",type:"msg",from:"zainab",text:"Day two. 150 applications came in. We need to screen them down to 5 for interviews."},
+    {t:"09:20",type:"reply",from:"zainab",text:"The hiring manager wants to reject anyone who didn't go to a top 5 university. How do you respond?",options:[
+      {label:"Push back, and suggest a blind skills-assessment instead",score:100,resp:"Thank you. Let's focus on what they can do, not where they went."},
+      {label:"Agree and filter by university",score:20,resp:"That's a huge bias and we will miss great talent."},
+      {label:"Compromise and only look at top 10 universities",score:50,resp:"Better, but still biased against non-traditional candidates."}]},
+    {t:"10:00",type:"task",title:"Create a screening rubric",
+      brief:"Create a 3-point scoring rubric to screen the CVs objectively. What 3 things will you look for to score a candidate from 1-5?",
+      due:"11:15 AM",minWords:35,
+      rubric:[
+        {label:"Relevant Skills",keywords:["skill","sql","excel","python","data","technical"],fix:"Focus on the actual technical skills required."},
+        {label:"Portfolio/Projects",keywords:["project","portfolio","github","dashboard","experience"],fix:"Look for evidence of practical work, not just job titles."},
+        {label:"Objective Criteria",keywords:["years","degree","certification","clear","measurable"],fix:"Ensure the criteria can be measured objectively."}],
+      sampleName:"screening-rubric.txt",
+      sampleBad:"1. How good their CV looks. 2. If they went to a good school. 3. If I get a good vibe from their cover letter.",
+      sampleGood:"1. Technical skills (1-5): Do they list SQL, Excel, or Python? 2. Practical evidence (1-5): Do they link a portfolio, GitHub, or mention specific projects they built? 3. Communication (1-5): Is the CV clear, free of typos, and well-structured?"},
+    {t:"11:05",type:"followup",from:"zainab",q:"How does a structured rubric reduce bias?",keywords:["because","objective","criteria","same","fair","data","gut","feel"],minWords:8,
+      good:"Spot on. It replaces 'gut feeling' with data.",weak:"Think about what happens when two recruiters use a rubric vs just reading CVs."},
+    {t:"11:30",type:"decision",q:"A candidate is great but has a 2-year employment gap",
+      a:{title:"Reject them immediately due to the gap",detail:"It looks unreliable on paper.",score:30,fb:"That's a bias. Employment gaps are normal (caregiving, health, layoffs)."},
+      b:{title:"Screen them in, and ask about the gap during the interview",detail:"Focus on their skills first, address the gap later.",score:100,fb:"Correct. The gap doesn't define their ability. Let them explain it."}},
+    {t:"13:00",type:"break"},
+    {t:"14:30",type:"quiz",q:"What is a 'blind CV' review?",
+      options:["Reviewing CVs in the dark","Removing names, photos, and universities before reviewing","Only reading the first page","Letting the AI decide"],correct:1,why:"Blind screening removes demographic markers so hiring managers focus purely on skills."}
+  ]},
+  {theme:"The Offer & Onboarding",steps:[
+    {t:"09:00",type:"msg",from:"zainab",text:"We found our candidate! But they asked for a salary 15% higher than our budget."},
+    {t:"09:25",type:"reply",from:"zainab",text:"How do you handle the negotiation?",options:[
+      {label:"Offer the lower salary plus a 6-month performance review bonus",score:100,resp:"Excellent. It respects the budget but motivates them."},
+      {label:"Reject them and start over",score:20,resp:"We'll lose a great candidate over a small gap."},
+      {label:"Give them exactly what they ask for",score:40,resp:"We can't blow the budget, it breaks internal equity."}]},
+    {t:"10:00",type:"task",title:"Write the Offer Letter",
+      brief:"Draft a short offer email. Include: Start date, Salary, and a warm welcome to the team.",
+      due:"11:15 AM",minWords:30,
+      rubric:[
+        {label:"Clear Terms",keywords:["salary","start date","position","title"],fix:"Include the salary and start date clearly."},
+        {label:"Professional Tone",keywords:["excited","welcome","pleasure","offer","team"],fix:"Make it sound welcoming, not robotic."},
+        {label:"Next Steps",keywords:["sign","contract","onboarding","reply","accept"],fix:"Tell them exactly how to accept the offer."}],
+      sampleName:"offer-email.txt",
+      sampleBad:"Hi. You got the job. Salary is 200k. Start on Monday. Let us know.",
+      sampleGood:"Dear [Name], We are delighted to offer you the Junior Data Analyst position at Tembea Logistics. Your starting salary will be 200,000 NGN per month, with a start date of November 1st. We were very impressed by your portfolio. Please review the attached contract and reply by Friday to accept. We look forward to welcoming you!"},
+    {t:"11:05",type:"followup",from:"zainab",q:"Why is a warm offer email important?",keywords:["excited","culture","impression","candidate","experience","welcome","accept"],minWords:8,
+      good:"Yes, the candidate experience starts before Day 1.",weak:"Think about how the candidate feels after a long interview process."},
+    {t:"11:30",type:"decision",q:"The candidate accepts! What's next?",
+      a:{title:"Send a laptop and wait for Monday",detail:"Let them rest before starting.",score:30,fb:"They will arrive confused. Onboarding starts the moment they sign."},
+      b:{title:"Send a welcome pack with the 30-day training plan",detail:"Give them reading material and team intros.",score:100,fb:"Perfect. Day 1 should feel like Day 5 because they already know what to expect."}},
+    {t:"13:00",type:"break"},
+    {t:"14:30",type:"quiz",q:"What is the main goal of a 30-60-90 day onboarding plan?",
+      options:["To test if they will quit","To give them clear goals and expectations for their first 3 months","To make them work weekends","To replace the interview process"],correct:1,why:"A 30-60-90 plan provides a roadmap so the new hire knows exactly how success is measured."}
+  ]}
+  ]
+}
+};
 /* ---------- Premium mentors (sample profiles) ---------- */
 const MENTORS = [
   {id:"m1",name:"Sample Mentor A",title:"Senior Product Manager, fintech",role:"pm",slots:["Sat 10:00 AM","Sat 2:00 PM","Sun 4:00 PM"],color:"#5B2BC4",ini:"SA"},
