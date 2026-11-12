@@ -333,7 +333,7 @@ da:{
    
 /* ============================ HR PERSONNEL ============================ */
 hr:{
-  id:"hr", title:"HR Personnel", short:"HR", manager:"zainab", cls:"",
+  id:"hr", title:"HR Personnel", short:"HR", manager:"zainab", cls:"h",
   blurb:"Source, screen, and hire top talent for a growing tech startup.",
   learn:["Write a job description that attracts the right candidates","Screen CVs objectively without unconscious bias","Conduct structured interviews and make an offer"],
   skills:["Sourcing","Screening","Interviewing","Bias mitigation","Negotiation","Onboarding"],
@@ -423,7 +423,8 @@ hr:{
 const MENTORS = [
   {id:"m1",name:"Sample Mentor A",title:"Senior Product Manager, fintech",role:"pm",slots:["Sat 10:00 AM","Sat 2:00 PM","Sun 4:00 PM"],color:"#5B2BC4",ini:"SA"},
   {id:"m2",name:"Sample Mentor B",title:"Engineering Manager, logistics tech",role:"swe",slots:["Sat 11:00 AM","Sun 10:00 AM","Sun 5:00 PM"],color:"#0B6E5B",ini:"SB"},
-  {id:"m3",name:"Sample Mentor C",title:"Head of Analytics, retail",role:"da",slots:["Sat 1:00 PM","Sun 12:00 PM","Sun 6:00 PM"],color:"#0A5FA8",ini:"SC"}
+  {id:"m3",name:"Sample Mentor C",title:"Head of Analytics, retail",role:"da",slots:["Sat 1:00 PM","Sun 12:00 PM","Sun 6:00 PM"],color:"#0A5FA8",ini:"SC"},
+  {id:"m4",name:"Sample Mentor D",title:"HR Business Partner, tech",role:"hr",slots:["Sat 12:00 PM","Sun 11:00 AM","Sun 7:00 PM"],color:"#D93900",ini:"SD"}
 ];
 
 /* ---------- Sample candidates for the employer demo (fictional) ---------- */

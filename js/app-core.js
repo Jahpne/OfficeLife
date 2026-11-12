@@ -33,6 +33,7 @@ const S = {
   filters: { role: "", uni: "", min: "", q: "" },
   mentorRole: "", next: ""
 };
+const saveUser = () => { persist(); if (S.user && S.user.email) { const a = store.get("accounts", {}); a[S.user.email] = S.user; store.set("accounts", a); } };
 const persist = () => { store.set("user", S.user); store.set("certs", S.certs); store.set("bookings", S.bookings); store.set("shortlist", S.shortlist); store.set("posts", S.posts); };
 
 /* ---------- icons ---------- */
@@ -139,7 +140,7 @@ function shell(active, body) { return header(active) + body + footer(); }
 function roleCard(k) {
   const r = role(k);
   return `<button class="course" data-act="go" data-to="/sim/${k}"><div class="org ${r.cls}">${r.short}</div>
-    <div><div class="o">Tembea Logistics</div><div class="n">${r.title}</div><div class="m">Career simulation &middot; 1 to 6 workdays &middot; Certificate</div></div></button>`;
+    <div><div class="o">Tembea Logistics</div><div class="n">${r.title}</div><div class="m">Career simulation &middot; 1 to ${Math.max(3, r.days.length)} workdays &middot; Certificate</div></div></button>`;
 }
 function dayPlanRail() {
   return `<div class="rail">${DAY_PLAN.map(p => `<div class="step"><div class="tm">${p[0]}</div><div class="tx"><b>${p[1]}</b><span class="small muted">${p[2]}</span></div></div>`).join("")}</div>`;
@@ -310,187 +311,28 @@ function doLogin() {
 async function googleSignIn() {
   if (!CONFIG.googleClientId) {
     openSheet(`<div class="hd"><h2>Choose an account</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div>
-      <p class="small muted">Demo mode. Real Google sign-in turns on when a Google client ID is added to the config.</p>
+      <p class="small muted">Demo mode. Real Google sign-in turns on when a Google client ID is added to js/config.js.</p>
       <div class="choices"><button class="choice" data-act="googleDemo"><b>Demo Student</b><span>demo.student@gmail.com</span></button></div>`);
     return;
   }
   try {
     await loadScript("https://accounts.google.com/gsi/client");
-    google.accounts.id.initialize({
-      client_id: CONFIG.googleClientId,
-      callback: resp => {
-        const p = JSON.parse(b64d(resp.credential.split(".")[1]));
-        S.form.name = p.name || ""; S.form.email = p.email || ""; S.form.google = true;
-        const accounts = store.get("accounts", {}); const known = accounts[(p.email || "").toLowerCase()];
-        if (known) { S.user = known; persist(); nav("/dashboard"); } else nav("/signup"), route();
-      }
-    });
-    google.accounts.id.prompt();
-  } catch (e) { toast("Could not reach Google. Use email for now."); }
+    google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential });
+    openSheet(`<div class="hd"><h2>Continue with Google</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div>
+      <p class="small muted">Choose your Google account.</p>
+      <div id="g-btn" style="display:flex;justify-content:center;margin-top:16px;min-height:44px"></div>
+      <p class="xs muted" style="margin-top:12px;text-align:center">If you see Error 400: origin_mismatch, add this site's address under Authorized JavaScript origins in Google Cloud.</p>`);
+    google.accounts.id.renderButton($("#g-btn"), { theme: "outline", size: "large", text: "continue_with", shape: "rectangular", width: 280 });
+  } catch (e) { toast("Could not reach Google. Check your connection or use email."); }
 }
-
-function sim(id) {
-  const r = role(id) || role("pm"); id = r.id;
-  const days = S.form.simDays || 1;
-  const lens = [[1, "1 day", "About 12 minutes"], [3, "3 days (Full Cert)", "About 35 minutes"], [6, "6 days (Advanced)", "About 70 minutes"]];
-  return shell("explore", `<main>
-    <section class="wash"><div class="wrap">
-      <div class="crumbs"><button data-act="go" data-to="/">Home</button>&rsaquo;<button data-act="go" data-to="/explore">Simulations</button>&rsaquo;<span>${r.title}</span></div>
-      <h1>${r.title} Simulation</h1>
-      <p class="muted" style="margin-top:8px;max-width:60ch">${r.blurb}</p>
-      <p class="small" style="margin-top:12px">Part of <b>OfficeLife Career Simulations</b></p>
-      <div class="row" style="margin-top:10px;flex-wrap:wrap"><div class="org ${r.cls}" style="width:28px;height:28px;font-size:11px">TL</div><span class="small">Manager: <b>${PEOPLE[r.manager].name}</b> (simulated)</span><span class="chip blue">New</span></div>
-    </div></section>
-    <div class="wrap">
-      <div class="facts">
-        <div class="fact"><b>${days} ${days > 1 ? "workdays" : "workday"}</b><span>Experience a real day at the office</span></div>
-        <div class="fact"><b>Beginner level</b><span>No prior experience required</span></div>
-        <div class="fact"><b>10 to 15 minutes a day</b><span>Learn at your own pace</span></div>
-        <div class="fact"><b>Verified certificate</b><span>Link, QR code and scores</span></div>
-      </div>
-      <section class="sect"><div class="card" style="max-width:640px">
-        <h2 style="font-size:20px">Set up your simulation</h2>
-        <p class="small muted" style="margin:4px 0 14px">Choose how long you want to work. Complete 3 days total to unlock your certificate.</p>
-        <div class="choices" role="radiogroup" aria-label="Simulation length">${lens.map(l => `<button class="opt" role="radio" aria-checked="${days === l[0]}" data-act="setDays" data-n="${l[0]}" data-id="${id}"><span class="radio"></span><div><b>${l[1]}</b><span>${l[2]}</span></div></button>`).join("")}</div>
-        <button class="btn pri block" style="margin-top:18px" data-act="enroll" data-id="${id}" data-n="${days}">${S.user ? "Enroll for free" : "Sign up to enroll"}</button>
-        <p class="xs muted" style="margin-top:8px;text-align:center">Starts now &middot; Your arrival time is logged against a 9:00 AM shift</p>
-      </div></section>
-      <section class="sect"><h2>What you'll learn</h2><ul class="checks" style="margin-top:12px">${r.learn.map(x => `<li>${I.check}<span>${x}</span></li>`).join("")}</ul></section>
-      <section class="sect"><h2>Skills you'll gain</h2><div class="chips" style="margin-top:12px">${r.skills.map(x => `<span class="chip">${x}</span>`).join("")}</div></section>
-      <section class="sect"><h2>Your ${days > 1 ? days + " days" : "day"} at Tembea</h2><div class="grid3" style="margin-top:12px">${r.days.slice(0, Math.min(days, r.days.length)).map((d, i) => `<div class="card"><span class="chip blue">Day ${i + 1}</span><h3 style="margin-top:8px">${esc(d.theme)}</h3></div>`).join("")}</div></section>
-      <section class="sect"><h2>How each day runs</h2>${dayPlanRail()}</section>
-      <section class="sect"><h2>Jobs this prepares you for</h2><p class="muted" style="margin-top:6px">${r.jobs}</p></section>
-      <section class="sect"><h2>Details to know</h2><div class="card kv" style="margin-top:12px">
-        <div><span class="k">Assessments</span><span class="v">Reviewed on every task</span></div>
-        <div><span class="k">Check-ins</span><span class="v">Clock in and out logged</span></div>
-        <div><span class="k">Certificate</span><span class="v">Verified link and QR</span></div>
-        <div><span class="k">Language</span><span class="v">English</span></div></div></section>
-    </div></main>`);
+function onGoogleCredential(resp) {
+  try {
+    const p = JSON.parse(b64d(resp.credential.split(".")[1]));
+    closeSheet();
+    const email = (p.email || "").toLowerCase();
+    const known = store.get("accounts", {})[email];
+    if (known) { S.user = known; persist(); toast("Welcome back, " + (known.name || "").split(" ")[0]); const go = S.next || "/dashboard"; S.next = ""; nav(go); return; }
+    S.form.name = p.name || ""; S.form.email = email; S.form.google = true;
+    if (parseRoute().name === "signup") route(); else nav("/signup");
+  } catch (e) { toast("Google sign-in failed. Please try again."); }
 }
-
-const actions = {
-  go: a => { const to = a.dataset.to; if (to === "/#faq") { nav("/"); setTimeout(() => { const f = $("#faq"); if (f) f.scrollIntoView({ behavior: "smooth" }); }, 60); } else nav(to); },
-  drawer: openDrawer, closeDrawer,
-  drawerGo: a => { closeDrawer(); nav(a.dataset.to); },
-  closeSheet,
-  theme: () => {
-    const dark = S.theme ? S.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    S.theme = dark ? "light" : "dark"; store.set("theme", S.theme); applyTheme(); closeDrawer();
-  },
-  lite: () => { S.lite = !S.lite; store.set("lite", S.lite); applyTheme(); route(); },
-  google: googleSignIn,
-  googleDemo: () => { closeSheet(); S.form.name = "Demo Student"; S.form.email = "demo.student@gmail.com"; S.form.google = true; if (parseRoute().name === "login") nav("/signup"); else route(); },
-  doSignup, doLogin,
-  pickUni: a => { const inp = $("#" + a.dataset.id); inp.value = a.dataset.v; S.form[inp.dataset.f] = a.dataset.v; hideUniList(a.dataset.id); },
-  setDays: a => { S.form.simDays = +a.dataset.n; const y = scrollY; route(); scrollTo(0, y); },
-  enroll: a => {
-    S.form.simDays = +a.dataset.n;
-    if (!S.user) { S.next = "/sim/" + a.dataset.id; return nav("/signup"); }
-    
-    if (!S.user.progress) S.user.progress = {};
-
-    S.enroll = { role: a.dataset.id, days: +a.dataset.n }; 
-    S.day = 0; S.log = []; S.revised = false; S.aiFails = 0; nav("/clockin");
-  },
-  setArrival: a => { S.arrival = a.dataset.k; route(); },
-  clockIn: () => { doClockIn(); route(); },
-  enterWork: () => nav("/work"),
-  leaveWork: () => { S.runId = 0; nav("/dashboard"); },
-  pick: () => $("#file").click(),
-  sample: () => { const T = S.task; if (!T) return; submitTask({ name: T.st.sampleName, text: T.attempt === 0 ? T.st.sampleBad : T.st.sampleGood }); },
-  typeToggle: () => showEditor(""),
-  cancelEditor: showPicker,
-  editAgain: () => showEditor(S.task && S.task.last ? S.task.last.text : ""),
-  submitText: () => { const v = ($("#ans") || {}).value || ""; if (wordCount(v) < 5) return toast("Write a little more first"); submitTask({ name: "Typed answer", text: v }); },
-  submitNote: () => { const v = ($("#note") || {}).value || ""; const T = S.task; if (wordCount(v) < 5) return toast("Add a few words describing your work"); submitTask({ name: T.pendingSub.name, text: v, image: T.pendingSub.image, noted: true }); },
-  reply: a => {
-    const P = S.pending; if (!P) return; S.pending = null;
-    const o = P.st.options[+a.dataset.i]; P.q.remove(); S.log[S.day].rep = o.score; me(o.label);
-    const ty = typing(P.st.from);
-    after(P.id, 900, () => { ty.remove(); say(P.st.from, o.resp, fmtMin(S.cur)); after(P.id, 700, () => advance(P.id)); });
-  },
-  fuSend: () => {
-    const F = S.fu; if (!F) return; const v = ($("#fu-in") || {}).value || "";
-    if (wordCount(v) < 3) return toast("Write at least a short sentence");
-    S.fu = null; F.el.remove(); me(v);
-    const r = evaluateFollowup(v, F.st); S.log[S.day].ex = r.pct;
-    const ty = typing(F.st.from);
-    after(F.id, 1000, () => { ty.remove(); say(F.st.from, r.feedback, fmtMin(S.cur)); after(F.id, 800, () => advance(F.id)); });
-  },
-  decide: a => decide(a.dataset.k),
-  answer: a => {
-    const Q = S.quiz; if (!Q || Q.done) return; Q.done = true;
-    const i = +a.dataset.i, ok = i === Q.st.correct; S.log[S.day].quiz = ok;
-    $$("#qopts .choice").forEach((b, k) => { if (k === Q.st.correct) b.classList.add("right"); else if (k === i) b.classList.add("wrong"); });
-    $("#qfb").innerHTML = `<p class="why"><b>${ok ? "Correct." : "Not quite."}</b> ${Q.st.why}</p><button class="btn pri block" style="margin-top:14px" data-act="quizNext">Continue</button>`;
-  },
-  quizNext: () => { const Q = S.quiz; closeModal(); put("Back to work", "sys"); after(Q.id, 600, () => advance(Q.id)); },
-  clockOut: () => { S.log[S.day].out = "5:00 PM"; nav("/summary"); },
-  nextDay: () => { 
-    S.day++; 
-    const maxDaysInRole = role(S.enroll.role).days.length;
-    if (S.day >= maxDaysInRole) S.day = 0; // Loop back to Day 1 if they are doing a 6-day run
-    nav("/clockin"); 
-  },
-  toCert: () => { const c = makeCert(); nav("/cert/" + c.code); },
-  mentorFilter: a => { S.mentorRole = a.dataset.r; route(); },
-  bookOpen: a => openBooking(a.dataset.id),
-  pickSlot: a => { S.form.slot = a.dataset.s; $$("[data-act=pickSlot]").forEach(b => b.setAttribute("aria-checked", String(b === a))); },
-  confirmBooking,
-  buyPlus: () => {
-    if (!S.user) { S.next = "/premium"; return nav("/signup"); }
-    if (S.user.plan === "plus") return toast("You are already on Premium");
-    openSheet(`<div class="hd"><h2>Start Premium</h2><button class="icon" data-act="closeSheet" aria-label="Close">${I.x}</button></div><p class="muted">${naira(PRICING.plus)} per month. Cancel any time.</p>
-      <p class="small muted" style="margin-top:8px">Demo payment. The live version uses Paystack.</p><button class="btn pri block" style="margin-top:14px" data-act="payPlus">Pay ${naira(PRICING.plus)} (demo)</button>`);
-  },
-  payPlus: () => { S.user.plan = "plus"; persist(); closeSheet(); toast("Welcome to Premium"); route(); },
-  viewCand: a => viewCand(a.dataset.n),
-  shortlist: a => { const n = a.dataset.n, i = S.shortlist.indexOf(n); if (i >= 0) S.shortlist.splice(i, 1); else S.shortlist.push(n); persist(); $("#cands").innerHTML = candCards(); },
-  invite: a => inviteCand(a.dataset.n),
-  sendInvite: () => { closeSheet(); toast("Invite sent (demo)"); },
-  postSim: () => {
-    const f = S.form; if (!(f.pco || "").trim() || !(f.prole || "").trim() || wordCount(f.ptask) < 5) return toast("Fill in all three fields");
-    S.posts.push({ co: f.pco.trim(), role: f.prole.trim() }); persist(); f.pco = f.prole = f.ptask = ""; toast("Request received. We will contact you."); const y = scrollY; route(); scrollTo(0, y);
-  },
-  csv: downloadCSV,
-  scrollTo: a => { const e = $("#" + a.dataset.id); if (e) e.scrollIntoView({ behavior: "smooth" }); },
-  saveProfile,
-  signout: () => { S.user = null; persist(); store.del("user"); toast("Signed out"); nav("/"); },
-  linkedin: () => window.open(S.liUrl, "_blank", "noopener"),
-  printCert: () => window.print(),
-  whatsapp: () => window.open("https://wa.me/?text=" + encodeURIComponent(S.shareText), "_blank", "noopener"),
-  copyLink: async () => { try { await navigator.clipboard.writeText(S.shareLink); toast("Link copied"); } catch (e) { prompt("Copy this link", S.shareLink); } }
-};
-
-document.addEventListener("click", e => {
-  const a = e.target.closest("[data-act]");
-  if (!e.target.closest(".combo")) $$("[data-combo]").forEach(i => hideUniList(i.id));
-  if (!a) return;
-  const f = actions[a.dataset.act]; if (f) f(a);
-});
-document.addEventListener("input", e => {
-  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
-  S.form[k] = t.value;
-  if (t.dataset.combo) renderUniList(t.id);
-  if (t.dataset.live === "explore") { const q = t.value.toLowerCase(); const list = Object.keys(ROLES).filter(x => !q || ROLES[x].title.toLowerCase().includes(q) || ROLES[x].skills.join(" ").toLowerCase().includes(q)); $("#exlist").innerHTML = list.map(roleCard).join("") || '<p class="muted">No roles match your search.</p>'; }
-  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
-});
-document.addEventListener("change", e => {
-  const t = e.target, k = t.dataset && t.dataset.f; if (!k) return;
-  S.form[k] = t.value;
-  if (t.dataset.flt) { S.filters[k] = t.value; $("#cands").innerHTML = candCards(); }
-});
-document.addEventListener("focusin", e => { if (e.target.dataset && e.target.dataset.combo) renderUniList(e.target.id); });
-document.addEventListener("keydown", e => {
-  const t = e.target;
-  if (t.dataset && t.dataset.combo) {
-    if (e.key === "Escape") hideUniList(t.id);
-    if (e.key === "Enter") { e.preventDefault(); const first = $("#" + t.id + "-list button[data-v]"); if (first) { t.value = first.dataset.v; S.form[t.dataset.f] = t.value; hideUniList(t.id); } }
-  }
-  if (t.id === "fu-in" && e.key === "Enter") actions.fuSend();
-});
-$("#file").addEventListener("change", e => { const f = e.target.files[0]; if (f) handleFile(f); e.target.value = ""; });
-window.addEventListener("hashchange", route);
-
-applyTheme();
-route();

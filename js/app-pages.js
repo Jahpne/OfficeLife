@@ -23,9 +23,10 @@ function dashboard() {
       <div class="stat"><b>${badges.length}</b><span>badges from your latest run</span></div>
     </div></section>
 
+    ${(() => { const pg = u.progress || {}; const ks = Object.keys(pg).filter(k => ROLES[k] && pg[k] > 0); return ks.length ? `<section class="sect"><h2>Your progress</h2><div class="grid3" style="margin-top:12px">${ks.map(k => { const n = Math.min(pg[k], 3); return `<div class="card"><div class="row"><div class="org ${ROLES[k].cls}">${ROLES[k].short}</div><div><b>${ROLES[k].title}</b><div class="small muted">${n} of 3 days toward your certificate</div></div></div><div class="row" style="margin-top:12px"><div class="bar"><i style="width:${Math.round(n / 3 * 100)}%"></i></div></div>${n < 3 ? `<button class="btn out sm" style="margin-top:12px" data-act="go" data-to="/sim/${k}">Continue</button>` : `<span class="chip ok" style="margin-top:12px">Certificate unlocked</span>`}</div>`; }).join("")}</div></section>` : ""; })()}
     <section class="sect"><h2>${certs.length ? "Start another simulation" : "Start your first workday"}</h2>
       <p class="lead">Pick a role. Each workday takes 10 to 15 minutes.</p>
- <div class="grid3">${["pm", "swe", "da", "hr"].map(roleCard).join("")}</div>
+      <div class="grid3">${Object.keys(ROLES).map(roleCard).join("")}</div></section>
 
     ${certs.length ? `<section class="sect"><h2>Your certificates</h2><div class="grid2" style="margin-top:12px">
       ${certs.slice().reverse().map((c, i) => `<div class="card"><div class="row"><div class="org ${role(c.role).cls}">${role(c.role).short}</div><div><b>${role(c.role).title}</b><div class="small muted">${c.n}-day simulation &middot; ${prettyDate(c.date)}</div></div></div>
@@ -55,15 +56,18 @@ function explore() {
 /* ---------- simulation page ---------- */
 function sim(id) {
   const r = role(id) || role("pm"); id = r.id;
-  const days = S.form.simDays || 1;
-  const lens = [[1, "1 day", "About 12 minutes"], [2, "2 days", "About 25 minutes in total"], [3, "3 days", "About 40 minutes in total"]];
+  const prog = (S.user && S.user.progress && S.user.progress[id]) || 0;
+  const len = r.days.length;
+  const lens = [[1, "1 day", "About 12 minutes"], [3, "3 days (full certificate)", "About 35 minutes"]];
+  if (len >= 6) lens.push([6, "6 days (advanced)", "About 70 minutes"]);
+  const days = lens.some(l => l[0] === (S.form.simDays || 3)) ? (S.form.simDays || 3) : 3;
   return shell("explore", `<main>
     <section class="wash"><div class="wrap">
       <div class="crumbs"><button data-act="go" data-to="/">Home</button>&rsaquo;<button data-act="go" data-to="/explore">Simulations</button>&rsaquo;<span>${r.title}</span></div>
       <h1>${r.title} Simulation</h1>
       <p class="muted" style="margin-top:8px;max-width:60ch">${r.blurb}</p>
       <p class="small" style="margin-top:12px">Part of <b>OfficeLife Career Simulations</b></p>
-      <div class="row" style="margin-top:10px;flex-wrap:wrap"><div class="org ${r.cls}" style="width:28px;height:28px;font-size:11px">TL</div><span class="small">Manager: <b>${PEOPLE[r.manager].name}</b> (simulated)</span><span class="chip blue">New</span></div>
+      <div class="row" style="margin-top:10px;flex-wrap:wrap"><div class="org ${r.cls}" style="width:28px;height:28px;font-size:11px">TL</div><span class="small">Manager: <b>${PEOPLE[r.manager].name}</b> (simulated)</span><span class="chip blue">New</span>${prog ? `<span class="chip ok">Your progress: ${Math.min(prog, 3)} of 3 days</span>` : ""}</div>
     </div></section>
     <div class="wrap">
       <div class="facts">
@@ -74,14 +78,14 @@ function sim(id) {
       </div>
       <section class="sect"><div class="card" style="max-width:640px">
         <h2 style="font-size:20px">Set up your simulation</h2>
-        <p class="small muted" style="margin:4px 0 14px">Choose how long you want to work.</p>
+        <p class="small muted" style="margin:4px 0 14px">Choose how long you want to work. Complete 3 days in total to unlock your certificate. Your progress is saved, so you can do it in more than one sitting.</p>
         <div class="choices" role="radiogroup" aria-label="Simulation length">${lens.map(l => `<button class="opt" role="radio" aria-checked="${days === l[0]}" data-act="setDays" data-n="${l[0]}" data-id="${id}"><span class="radio"></span><div><b>${l[1]}</b><span>${l[2]}</span></div></button>`).join("")}</div>
-        <button class="btn pri block" style="margin-top:18px" data-act="enroll" data-id="${id}" data-n="${days}">${S.user ? "Enroll for free" : "Sign up to enroll"}</button>
+        <button class="btn pri block" style="margin-top:18px" data-act="enroll" data-id="${id}" data-n="${days}">${S.user ? (prog && prog < 3 ? "Continue where you left off" : "Enroll for free") : "Sign up to enroll"}</button>
         <p class="xs muted" style="margin-top:8px;text-align:center">Starts now &middot; Your arrival time is logged against a 9:00 AM shift</p>
       </div></section>
       <section class="sect"><h2>What you'll learn</h2><ul class="checks" style="margin-top:12px">${r.learn.map(x => `<li>${I.check}<span>${x}</span></li>`).join("")}</ul></section>
       <section class="sect"><h2>Skills you'll gain</h2><div class="chips" style="margin-top:12px">${r.skills.map(x => `<span class="chip">${x}</span>`).join("")}</div></section>
-      <section class="sect"><h2>Your ${days > 1 ? days + " days" : "day"} at Tembea</h2><div class="grid3" style="margin-top:12px">${r.days.slice(0, days).map((d, i) => `<div class="card"><span class="chip blue">Day ${i + 1}</span><h3 style="margin-top:8px">${esc(d.theme)}</h3></div>`).join("")}</div></section>
+      <section class="sect"><h2>Your ${Math.min(days, len) > 1 ? Math.min(days, len) + " days" : "day"} at Tembea</h2><div class="grid3" style="margin-top:12px">${r.days.slice(0, Math.min(days, len)).map((d, i) => `<div class="card"><span class="chip blue">Day ${i + 1}</span><h3 style="margin-top:8px">${esc(d.theme)}</h3></div>`).join("")}</div></section>
       <section class="sect"><h2>How each day runs</h2>${dayPlanRail()}</section>
       <section class="sect"><h2>Jobs this prepares you for</h2><p class="muted" style="margin-top:6px">${r.jobs}</p></section>
       <section class="sect"><h2>Details to know</h2><div class="card kv" style="margin-top:12px">
@@ -107,7 +111,7 @@ function premium() {
     </div><p class="src">Pilot pricing, subject to change. Payments use Paystack in the live version; here the payment step is a demo.</p></section>
 
     <section class="sect"><h2>Book a mentor</h2><p class="lead">Sample mentor profiles. In the live version these are vetted professionals from partner companies.</p>
-      <div class="chips" style="margin-bottom:12px">${[["", "All"], ["pm", "Project Manager"], ["swe", "Software"], ["da", "Data"]].map(r => `<button class="pill" aria-pressed="${S.mentorRole === r[0]}" data-act="mentorFilter" data-r="${r[0]}" style="${S.mentorRole === r[0] ? "border-color:var(--blue);color:var(--blue)" : ""}">${r[1]}</button>`).join("")}</div>
+      <div class="chips" style="margin-bottom:12px">${[["", "All"], ["pm", "Project Manager"], ["swe", "Software"], ["da", "Data"], ["hr", "HR"]].map(r => `<button class="pill" aria-pressed="${S.mentorRole === r[0]}" data-act="mentorFilter" data-r="${r[0]}" style="${S.mentorRole === r[0] ? "border-color:var(--blue);color:var(--blue)" : ""}">${r[1]}</button>`).join("")}</div>
       <div class="grid3">${ms.map(m => `<div class="card"><div class="row"><div class="av" style="background:${m.color}">${m.ini}</div><div><b>${m.name}</b><div class="small muted">${m.title}</div></div></div>
         <p class="small muted" style="margin:10px 0">Next slots: ${m.slots.join(", ")}</p><button class="btn out block" data-act="bookOpen" data-id="${m.id}">Book a session</button></div>`).join("")}</div></section>
 
@@ -240,7 +244,7 @@ function downloadCSV() {
 function profile() {
   const u = S.user, f = S.form;
   if (f.pname === undefined) { f.pname = u.name; f.puni = u.uni; f.plevel = u.level; f.pcourse = u.course; f.ptarget = u.target; }
-  const careers = [["", "Choose one"], ["pm", "Project Manager"], ["swe", "Software Engineer"], ["da", "Data Analyst"], ["unsure", "Not sure yet"]];
+  const careers = [["", "Choose one"], ["pm", "Project Manager"], ["swe", "Software Engineer"], ["da", "Data Analyst"], ["hr", "HR Personnel"], ["unsure", "Not sure yet"]];
   return shell("", `<main class="narrow"><div class="hello"><h1>Your profile</h1></div>
     <div class="card">
       <div class="field"><label for="pf-name">Full name</label><input id="pf-name" data-f="pname" value="${esc(f.pname)}"></div>
@@ -260,6 +264,5 @@ function saveProfile() {
   if (!uni) { f.perr = "Choose your university from the list."; return route(); }
   if ((f.pname || "").trim().length < 3) { toast("Enter your full name"); return; }
   Object.assign(S.user, { name: f.pname.trim(), uni, level: f.plevel, course: f.pcourse || "", target: f.ptarget || "" });
-  const accounts = store.get("accounts", {}); accounts[S.user.email] = S.user; store.set("accounts", accounts);
-  persist(); f.perr = ""; S.form = {}; toast("Profile saved"); nav("/dashboard");
+  saveUser(); f.perr = ""; S.form = {}; toast("Profile saved"); nav("/dashboard");
 }
